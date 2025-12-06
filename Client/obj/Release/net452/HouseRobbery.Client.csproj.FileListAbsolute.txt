@@ -1,0 +1,9 @@
+C:\Users\young\Desktop\HouseRobbery\Client\bin\Release\net452\HouseRobbery.Client.net.dll
+C:\Users\young\Desktop\HouseRobbery\Client\bin\Release\net452\CitizenFX.Core.Client.dll
+C:\Users\young\Desktop\HouseRobbery\Client\obj\Release\net452\HouseRobbery.Client.csproj.AssemblyReference.cache
+C:\Users\young\Desktop\HouseRobbery\Client\obj\Release\net452\HouseRobbery.Client.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\young\Desktop\HouseRobbery\Client\obj\Release\net452\HouseRobbery.Client.AssemblyInfoInputs.cache
+C:\Users\young\Desktop\HouseRobbery\Client\obj\Release\net452\HouseRobbery.Client.AssemblyInfo.cs
+C:\Users\young\Desktop\HouseRobbery\Client\obj\Release\net452\HouseRobbery.Client.csproj.CoreCompileInputs.cache
+C:\Users\young\Desktop\HouseRobbery\Client\obj\Release\net452\HouseRob.CD96EF70.Up2Date
+C:\Users\young\Desktop\HouseRobbery\Client\obj\Release\net452\HouseRobbery.Client.net.dll
