@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "LMsZMVCJfq8=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\young\\Desktop\\HouseRobbery\\Server\\HouseRobbery.Server.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\young\\.nuget\\packages\\citizenfx.core.server\\1.0.22934\\citizenfx.core.server.1.0.22934.nupkg.sha512",
+    "C:\\Users\\young\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "C:\\Users\\young\\.nuget\\packages\\netstandard.library\\2.0.3\\netstandard.library.2.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
