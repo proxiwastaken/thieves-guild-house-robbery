@@ -1,2 +1,3 @@
 C:\Users\young\Desktop\HouseRobbery\Client\bin\Release\net452\publish\HouseRobbery.Client.net.dll
 C:\Users\young\Desktop\HouseRobbery\Client\bin\Release\net452\publish\CitizenFX.Core.Client.dll
+C:\Users\young\Desktop\HouseRobbery\Client\bin\Release\net452\publish\Newtonsoft.Json.dll

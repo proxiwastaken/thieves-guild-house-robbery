@@ -18,10 +18,26 @@ namespace HouseRobbery.Client
         private bool nearHouse = false;
         private Vector3 currentHousePos;
         private bool showCoords = false;
+        Lockpicking lockpickingInstance;
+
+        private LootManager lootManager = new LootManager();
 
         public ClientMain()
         {
             Debug.WriteLine("House Robbery System Initialized!");
+
+            lockpickingInstance = new Lockpicking();
+
+            RegisterNuiCallbackType("lockpickingInput");
+            EventHandlers["__cfx_nui:lockpickingInput"] += new Action<IDictionary<string, object>, CallbackDelegate>((data, cb) =>
+            {
+                if (data.TryGetValue("key", out var keyObj))
+                {
+                    var key = keyObj as string;
+                    lockpickingInstance?.HandleNuiInput(key);
+                }
+                cb(new { ok = true });
+            });
         }
 
         [Command("getcoords")]
@@ -56,6 +72,49 @@ namespace HouseRobbery.Client
             showCoords = !showCoords;
             Screen.ShowNotification($"Coordinate display: {(showCoords ? "~g~ON~w~" : "~r~OFF~w~")}");
         }
+
+        [Command("placeloot")]
+        public void PlaceLoot(int source, List<object> args, string raw)
+        {
+            if (args.Count < 2)
+            {
+                Screen.ShowNotification("Usage: /placeloot [type] [amount]");
+                return;
+            }
+
+            string type = args[0].ToString();
+            int amount;
+            if (!int.TryParse(args[1].ToString(), out amount) || amount <= 0)
+            {
+                Screen.ShowNotification("Invalid amount.");
+                return;
+            }
+
+            var playerPed = PlayerPedId();
+            var pos = GetEntityCoords(playerPed, true);
+
+            var loot = new LootItem(type, pos, amount);
+            lootManager.AddLootItem(loot);
+
+            // Print to F8 console
+            string coordString = $"new LootItem(\"{type}\", new Vector3({pos.X:F1}f, {pos.Y:F1}f, {pos.Z:F1}f), {amount})";
+            Debug.WriteLine($"[LOOT] {coordString}");
+            Screen.ShowNotification($"Placed loot: {type} x{amount} at your feet.");
+        }
+
+        [Command("listloot")]
+        public void ListLoot(int source, List<object> args, string raw)
+        {
+            int i = 0;
+            foreach (var loot in lootManager.LootItems)
+            {
+                Debug.WriteLine($"[{i}] {loot.Type} at {loot.Position} (max: {loot.MaxAmount}, left: {loot.Remaining})");
+                i++;
+            }
+            Screen.ShowNotification("Loot list printed to F8 console.");
+        }
+
+
 
         [Tick]
         public async Task OnTick()
@@ -110,12 +169,44 @@ namespace HouseRobbery.Client
                 }
             }
 
+            // Check for loot pickup
+            foreach (var loot in lootManager.LootItems)
+            {
+                if (loot.IsDepleted) continue;
+                float dist = GetDistanceBetweenCoords(playerPos.X, playerPos.Y, playerPos.Z, loot.Position.X, loot.Position.Y, loot.Position.Z, true);
+                if (dist < 1.5f)
+                {
+                    Screen.DisplayHelpTextThisFrame($"Press ~INPUT_CONTEXT~ to pick up {loot.Type} ({loot.Remaining} left)");
+                    if (IsControlJustPressed(0, 51))
+                    {
+                        int taken = lootManager.PickUpLoot(loot, 1);
+                        Screen.ShowNotification($"Picked up {taken} {loot.Type}!");
+                    }
+                }
+            }
+
+            // Check for unloading at car
+            playerPed = PlayerPedId();
+            int vehicle = GetVehiclePedIsIn(playerPed, false);
+
+            if (DoesEntityExist(vehicle) && lootManager.CurrentCarried > 0)
+            {
+                Screen.DisplayHelpTextThisFrame("Press ~INPUT_CONTEXT~ to unload loot in your vehicle");
+                if (IsControlJustPressed(0, 51))
+                {
+                    lootManager.UnloadLoot();
+                    Screen.ShowNotification("Loot unloaded!");
+                }
+            }
+
+
             await Task.FromResult(0);
         }
 
         private async Task StartRobberyAttempt()
         {
             Screen.ShowNotification("Starting house robbery...");
+            lockpickingInstance.StartLockpicking();
             // TODO: Implement lockpicking minigame
             // TODO: Check if house is already robbed
             // TODO: Start alarm timer

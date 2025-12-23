@@ -9,14 +9,14 @@
     ".NETStandard,Version=v2.0/": {
       "HouseRobbery.Server/1.0.0": {
         "dependencies": {
-          "CitizenFX.Core.Server": "1.0.22934",
+          "CitizenFX.Core.Server": "1.0.23368",
           "NETStandard.Library": "2.0.3"
         },
         "runtime": {
           "HouseRobbery.Server.dll": {}
         }
       },
-      "CitizenFX.Core.Server/1.0.22934": {
+      "CitizenFX.Core.Server/1.0.23368": {
         "runtime": {
           "lib/netstandard20/CitizenFX.Core.Server.dll": {
             "assemblyVersion": "0.0.0.0",
@@ -38,12 +38,12 @@
       "serviceable": false,
       "sha512": ""
     },
-    "CitizenFX.Core.Server/1.0.22934": {
+    "CitizenFX.Core.Server/1.0.23368": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-Pbp4hWkb3nCMrCNidlCro6HVJFeXLTXmq9FmxcoG/SfGQvpWqL7/t5BJnsqroxYn3m3pALgjVIKTJ/2AbNVhYA==",
-      "path": "citizenfx.core.server/1.0.22934",
-      "hashPath": "citizenfx.core.server.1.0.22934.nupkg.sha512"
+      "sha512": "sha512-bmuau+vwkrULs4MnOCl5kXayOsV0AIloloDHhaagh81QO++uCCZWh0PEmlXV7rDpsCVAf6lJIhMSPItFdJUAjw==",
+      "path": "citizenfx.core.server/1.0.23368",
+      "hashPath": "citizenfx.core.server.1.0.23368.nupkg.sha512"
     },
     "Microsoft.NETCore.Platforms/1.1.0": {
       "type": "package",

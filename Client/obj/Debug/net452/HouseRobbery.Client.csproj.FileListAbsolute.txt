@@ -7,3 +7,5 @@ C:\Users\young\Desktop\HouseRobbery\Client\bin\Debug\net452\HouseRobbery.Client.
 C:\Users\young\Desktop\HouseRobbery\Client\bin\Debug\net452\CitizenFX.Core.Client.dll
 C:\Users\young\Desktop\HouseRobbery\Client\obj\Debug\net452\HouseRob.CD96EF70.Up2Date
 C:\Users\young\Desktop\HouseRobbery\Client\obj\Debug\net452\HouseRobbery.Client.net.dll
+C:\Users\young\Desktop\HouseRobbery\Client\obj\Debug\net452\HouseRobbery.Client.sourcelink.json
+C:\Users\young\Desktop\HouseRobbery\Client\bin\Debug\net452\Newtonsoft.Json.dll

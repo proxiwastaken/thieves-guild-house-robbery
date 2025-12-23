@@ -1,0 +1,11 @@
+C:\Users\young\Desktop\HouseRobbery\Server\bin\Debug\netstandard2.0\HouseRobbery.Server.deps.json
+C:\Users\young\Desktop\HouseRobbery\Server\bin\Debug\netstandard2.0\HouseRobbery.Server.net.dll
+C:\Users\young\Desktop\HouseRobbery\Server\bin\Debug\netstandard2.0\HouseRobbery.Server.net.pdb
+C:\Users\young\Desktop\HouseRobbery\Server\obj\Debug\netstandard2.0\HouseRobbery.Server.csproj.AssemblyReference.cache
+C:\Users\young\Desktop\HouseRobbery\Server\obj\Debug\netstandard2.0\HouseRobbery.Server.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\young\Desktop\HouseRobbery\Server\obj\Debug\netstandard2.0\HouseRobbery.Server.AssemblyInfoInputs.cache
+C:\Users\young\Desktop\HouseRobbery\Server\obj\Debug\netstandard2.0\HouseRobbery.Server.AssemblyInfo.cs
+C:\Users\young\Desktop\HouseRobbery\Server\obj\Debug\netstandard2.0\HouseRobbery.Server.csproj.CoreCompileInputs.cache
+C:\Users\young\Desktop\HouseRobbery\Server\obj\Debug\netstandard2.0\HouseRobbery.Server.sourcelink.json
+C:\Users\young\Desktop\HouseRobbery\Server\obj\Debug\netstandard2.0\HouseRobbery.Server.net.dll
+C:\Users\young\Desktop\HouseRobbery\Server\obj\Debug\netstandard2.0\HouseRobbery.Server.net.pdb

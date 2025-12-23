@@ -8,3 +8,4 @@ C:\Users\young\Desktop\HouseRobbery\Server\obj\Release\netstandard2.0\HouseRobbe
 C:\Users\young\Desktop\HouseRobbery\Server\obj\Release\netstandard2.0\HouseRobbery.Server.csproj.CoreCompileInputs.cache
 C:\Users\young\Desktop\HouseRobbery\Server\obj\Release\netstandard2.0\HouseRobbery.Server.net.dll
 C:\Users\young\Desktop\HouseRobbery\Server\obj\Release\netstandard2.0\HouseRobbery.Server.net.pdb
+C:\Users\young\Desktop\HouseRobbery\Server\obj\Release\netstandard2.0\HouseRobbery.Server.sourcelink.json

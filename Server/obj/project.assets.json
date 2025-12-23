@@ -2,7 +2,7 @@
   "version": 3,
   "targets": {
     ".NETStandard,Version=v2.0": {
-      "CitizenFX.Core.Server/1.0.22934": {
+      "CitizenFX.Core.Server/1.0.23683": {
         "type": "package",
         "compile": {
           "lib/netstandard20/CitizenFX.Core.Server.dll": {
@@ -42,14 +42,14 @@
     }
   },
   "libraries": {
-    "CitizenFX.Core.Server/1.0.22934": {
-      "sha512": "Pbp4hWkb3nCMrCNidlCro6HVJFeXLTXmq9FmxcoG/SfGQvpWqL7/t5BJnsqroxYn3m3pALgjVIKTJ/2AbNVhYA==",
+    "CitizenFX.Core.Server/1.0.23683": {
+      "sha512": "rhqQapzKcd/vjSbV2DcHmJYlh3GXRskGXhERM8K7yiZj0lrDly2tWFUMEFLYujKRNMYyUDlKCYhxKvx8MfOk9Q==",
       "type": "package",
-      "path": "citizenfx.core.server/1.0.22934",
+      "path": "citizenfx.core.server/1.0.23683",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "citizenfx.core.server.1.0.22934.nupkg.sha512",
+        "citizenfx.core.server.1.0.23683.nupkg.sha512",
         "citizenfx.core.server.nuspec",
         "lib/net45/CitizenFX.Core.Server.dll",
         "lib/net45/CitizenFX.Core.Server.xml",
@@ -280,6 +280,12 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.Net.Sdk.Compilers.Toolset",
+            "version": "[9.0.303, 9.0.303]"
+          }
+        ],
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.303\\RuntimeIdentifierGraph.json"
       }
     }

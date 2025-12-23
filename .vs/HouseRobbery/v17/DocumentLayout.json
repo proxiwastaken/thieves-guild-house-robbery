@@ -5,6 +5,41 @@
     {
       "AbsoluteMoniker": "D:0:0:{9CF3C769-BBC0-4033-9FA5-2772BA288110}|Client\\HouseRobbery.Client.csproj|c:\\users\\young\\desktop\\houserobbery\\client\\clientmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{9CF3C769-BBC0-4033-9FA5-2772BA288110}|Client\\HouseRobbery.Client.csproj|solutionrelative:client\\clientmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9CF3C769-BBC0-4033-9FA5-2772BA288110}|Client\\HouseRobbery.Client.csproj|c:\\users\\young\\desktop\\houserobbery\\client\\lootitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9CF3C769-BBC0-4033-9FA5-2772BA288110}|Client\\HouseRobbery.Client.csproj|solutionrelative:client\\lootitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9CF3C769-BBC0-4033-9FA5-2772BA288110}|Client\\HouseRobbery.Client.csproj|c:\\users\\young\\desktop\\houserobbery\\client\\lootmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9CF3C769-BBC0-4033-9FA5-2772BA288110}|Client\\HouseRobbery.Client.csproj|solutionrelative:client\\lootmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\young\\Desktop\\HouseRobbery\\ui\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ui\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\young\\Desktop\\HouseRobbery\\fxmanifest.lua||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:fxmanifest.lua||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\young\\Desktop\\txData\\FiveMBasicServerCFXDefault_34ACC9.base\\resources\\[local]\\houserobbery\\fxmanifest.lua||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\young\\Desktop\\HouseRobbery\\ui\\script.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ui\\script.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9CF3C769-BBC0-4033-9FA5-2772BA288110}|Client\\HouseRobbery.Client.csproj|c:\\users\\young\\desktop\\houserobbery\\client\\lockpicking.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9CF3C769-BBC0-4033-9FA5-2772BA288110}|Client\\HouseRobbery.Client.csproj|solutionrelative:client\\lockpicking.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9CF3C769-BBC0-4033-9FA5-2772BA288110}|Client\\HouseRobbery.Client.csproj|c:\\users\\young\\desktop\\houserobbery\\shared\\dummy.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9CF3C769-BBC0-4033-9FA5-2772BA288110}|Client\\HouseRobbery.Client.csproj|solutionrelative:shared\\dummy.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\young\\Desktop\\HouseRobbery\\ui\\style.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ui\\style.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,8 +49,118 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 9,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "LootManager.cs",
+              "DocumentMoniker": "C:\\Users\\young\\Desktop\\HouseRobbery\\Client\\LootManager.cs",
+              "RelativeDocumentMoniker": "Client\\LootManager.cs",
+              "ToolTip": "C:\\Users\\young\\Desktop\\HouseRobbery\\Client\\LootManager.cs",
+              "RelativeToolTip": "Client\\LootManager.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAABIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-23T15:17:44.366Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "LootItem.cs",
+              "DocumentMoniker": "C:\\Users\\young\\Desktop\\HouseRobbery\\Client\\LootItem.cs",
+              "RelativeDocumentMoniker": "Client\\LootItem.cs",
+              "ToolTip": "C:\\Users\\young\\Desktop\\HouseRobbery\\Client\\LootItem.cs",
+              "RelativeToolTip": "Client\\LootItem.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-23T15:17:17.545Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "fxmanifest.lua",
+              "DocumentMoniker": "C:\\Users\\young\\Desktop\\txData\\FiveMBasicServerCFXDefault_34ACC9.base\\resources\\[local]\\houserobbery\\fxmanifest.lua",
+              "RelativeDocumentMoniker": "..\\txData\\FiveMBasicServerCFXDefault_34ACC9.base\\resources\\[local]\\houserobbery\\fxmanifest.lua",
+              "ToolTip": "C:\\Users\\young\\Desktop\\txData\\FiveMBasicServerCFXDefault_34ACC9.base\\resources\\[local]\\houserobbery\\fxmanifest.lua",
+              "RelativeToolTip": "..\\txData\\FiveMBasicServerCFXDefault_34ACC9.base\\resources\\[local]\\houserobbery\\fxmanifest.lua",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-12-08T22:48:54.911Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Dummy.cs",
+              "DocumentMoniker": "C:\\Users\\young\\Desktop\\HouseRobbery\\Shared\\Dummy.cs",
+              "RelativeDocumentMoniker": "Shared\\Dummy.cs",
+              "ToolTip": "C:\\Users\\young\\Desktop\\HouseRobbery\\Shared\\Dummy.cs",
+              "RelativeToolTip": "Shared\\Dummy.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T22:35:17.53Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "script.js",
+              "DocumentMoniker": "C:\\Users\\young\\Desktop\\HouseRobbery\\ui\\script.js",
+              "RelativeDocumentMoniker": "ui\\script.js",
+              "ToolTip": "C:\\Users\\young\\Desktop\\HouseRobbery\\ui\\script.js",
+              "RelativeToolTip": "ui\\script.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-12-08T21:59:36.088Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "style.css",
+              "DocumentMoniker": "C:\\Users\\young\\Desktop\\HouseRobbery\\ui\\style.css",
+              "RelativeDocumentMoniker": "ui\\style.css",
+              "ToolTip": "C:\\Users\\young\\Desktop\\HouseRobbery\\ui\\style.css",
+              "RelativeToolTip": "ui\\style.css",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-12-08T21:59:09.021Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "fxmanifest.lua",
+              "DocumentMoniker": "C:\\Users\\young\\Desktop\\HouseRobbery\\fxmanifest.lua",
+              "RelativeDocumentMoniker": "fxmanifest.lua",
+              "ToolTip": "C:\\Users\\young\\Desktop\\HouseRobbery\\fxmanifest.lua",
+              "RelativeToolTip": "fxmanifest.lua",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-12-08T21:58:15.895Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "index.html",
+              "DocumentMoniker": "C:\\Users\\young\\Desktop\\HouseRobbery\\ui\\index.html",
+              "RelativeDocumentMoniker": "ui\\index.html",
+              "ToolTip": "C:\\Users\\young\\Desktop\\HouseRobbery\\ui\\index.html",
+              "RelativeToolTip": "ui\\index.html",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAABIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2025-12-08T21:57:57.744Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Lockpicking.cs",
+              "DocumentMoniker": "C:\\Users\\young\\Desktop\\HouseRobbery\\Client\\Lockpicking.cs",
+              "RelativeDocumentMoniker": "Client\\Lockpicking.cs",
+              "ToolTip": "C:\\Users\\young\\Desktop\\HouseRobbery\\Client\\Lockpicking.cs",
+              "RelativeToolTip": "Client\\Lockpicking.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T01:37:46.916Z"
+            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
@@ -24,7 +169,7 @@
               "RelativeDocumentMoniker": "Client\\ClientMain.cs",
               "ToolTip": "C:\\Users\\young\\Desktop\\HouseRobbery\\Client\\ClientMain.cs",
               "RelativeToolTip": "Client\\ClientMain.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAvAAAAAAAAAA==",
+              "ViewState": "AgIAAGIAAAAAAAAAAAAIwG0AAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-06T22:37:17.926Z",
               "EditorCaption": ""

@@ -1,0 +1,36 @@
+body {
+    background: transparent;
+    margin: 0;
+    overflow: hidden;
+}
+
+#lockpicking-ui {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+#lock-img, #lockpick-img {
+    width: 200px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#lockpick-img {
+    z-index: 2;
+    /* Will be rotated by JS */
+}
+
+#info {
+    position: absolute;
+    top: 220px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 20px;
+    text-shadow: 1px 1px 2px #000;
+}
