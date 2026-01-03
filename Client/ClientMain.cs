@@ -21,12 +21,22 @@ namespace HouseRobbery.Client
         Lockpicking lockpickingInstance;
 
         private LootManager lootManager = new LootManager();
+        private CameraManager cameraManager = new CameraManager();
+
+        private void OnAlarmTriggered()
+        {
+            // Handle alarm trigger - kick player out, spawn cops, etc.
+            Screen.ShowNotification("~r~SECURITY BREACH! Robbery failed!");
+            // TODO: Implement fail state from GDD
+        }
 
         public ClientMain()
         {
             Debug.WriteLine("House Robbery System Initialized!");
 
             lockpickingInstance = new Lockpicking();
+
+            cameraManager.OnAlarmTriggered += OnAlarmTriggered;
 
             RegisterNuiCallbackType("lockpickingInput");
             EventHandlers["__cfx_nui:lockpickingInput"] += new Action<IDictionary<string, object>, CallbackDelegate>((data, cb) =>
@@ -114,6 +124,31 @@ namespace HouseRobbery.Client
             Screen.ShowNotification("Loot list printed to F8 console.");
         }
 
+        [Command("addcamera")]
+        public void AddCamera(int source, List<object> args, string raw)
+        {
+            var playerPed = PlayerPedId();
+            var pos = GetEntityCoords(playerPed, true);
+
+            cameraManager.AddCamera(new Camera(
+                pos + new Vector3(0, 0, 2f), // Camera slightly above player
+                pos + new Vector3(-5f, -5f, 2f), // Point A
+                pos + new Vector3(5f, 5f, 2f)    // Point B
+            ));
+
+            Screen.ShowNotification("Camera added at current position");
+        }
+
+        [Command("disablecameras")]
+        public void DisableCameras(int source, List<object> args, string raw)
+        {
+            var playerPed = PlayerPedId();
+            var pos = GetEntityCoords(playerPed, true);
+
+            cameraManager.DisableCamerasInRadius(pos, 10f, 30f); // 10 meter radius, 30 second disable
+            Screen.ShowNotification("Cameras disabled with EMP!");
+        }
+
 
 
         [Tick]
@@ -198,6 +233,9 @@ namespace HouseRobbery.Client
                     Screen.ShowNotification("Loot unloaded!");
                 }
             }
+
+            cameraManager.Update();
+            cameraManager.DrawCameras();
 
 
             await Task.FromResult(0);
