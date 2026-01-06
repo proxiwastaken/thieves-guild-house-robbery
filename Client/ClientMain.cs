@@ -22,6 +22,7 @@ namespace HouseRobbery.Client
 
         private LootManager lootManager = new LootManager();
         private CameraManager cameraManager = new CameraManager();
+        private MissionManager missionManager;
 
         private void OnAlarmTriggered()
         {
@@ -37,6 +38,11 @@ namespace HouseRobbery.Client
             lockpickingInstance = new Lockpicking();
 
             cameraManager.OnAlarmTriggered += OnAlarmTriggered;
+
+            missionManager = new MissionManager(cameraManager, lootManager);
+            missionManager.OnMissionCompleted += (value) => Debug.WriteLine($"Mission completed with ${value}");
+            missionManager.OnMissionFailed += () => Debug.WriteLine("Mission failed!");
+
 
             RegisterNuiCallbackType("lockpickingInput");
             EventHandlers["__cfx_nui:lockpickingInput"] += new Action<IDictionary<string, object>, CallbackDelegate>((data, cb) =>
@@ -112,6 +118,26 @@ namespace HouseRobbery.Client
             Screen.ShowNotification($"Placed loot: {type} x{amount} at your feet.");
         }
 
+        [Command("addloot")]
+        public void AddLoot(int source, List<object> args, string raw)
+        {
+            if (args.Count < 2)
+            {
+                Screen.ShowNotification("Usage: /addloot [type] [amount]");
+                Screen.ShowNotification("Types: Cash, Jewelry, Painting, Electronics");
+                return;
+            }
+
+            string type = args[0].ToString();
+            if (!int.TryParse(args[1].ToString(), out int amount) || amount <= 0)
+            {
+                Screen.ShowNotification("~r~Invalid amount!");
+                return;
+            }
+
+            missionManager.GetMissionBuilder().AddLoot(type, amount);
+        }
+
         [Command("listloot")]
         public void ListLoot(int source, List<object> args, string raw)
         {
@@ -127,16 +153,24 @@ namespace HouseRobbery.Client
         [Command("addcamera")]
         public void AddCamera(int source, List<object> args, string raw)
         {
-            var playerPed = PlayerPedId();
-            var pos = GetEntityCoords(playerPed, true);
+            if (args.Count < 1)
+            {
+                Screen.ShowNotification("Usage: /addcamera [rotation] [range] [viewAngle] [scanAngle]");
+                Screen.ShowNotification("Example: /addcamera 90 15 60 45");
+                return;
+            }
 
-            cameraManager.AddCamera(new Camera(
-                pos + new Vector3(0, 0, 2f), // Camera slightly above player
-                pos + new Vector3(-5f, -5f, 2f), // Point A
-                pos + new Vector3(5f, 5f, 2f)    // Point B
-            ));
+            if (!float.TryParse(args[0].ToString(), out float rotation))
+            {
+                Screen.ShowNotification("~r~Invalid rotation value!");
+                return;
+            }
 
-            Screen.ShowNotification("Camera added at current position");
+            float range = args.Count > 1 && float.TryParse(args[1].ToString(), out float r) ? r : 15f;
+            float viewAngle = args.Count > 2 && float.TryParse(args[2].ToString(), out float v) ? v : 60f;
+            float scanAngle = args.Count > 3 && float.TryParse(args[3].ToString(), out float s) ? s : 45f;
+
+            missionManager.GetMissionBuilder().AddCamera(rotation, range, viewAngle, scanAngle);
         }
 
         [Command("disablecameras")]
@@ -147,6 +181,69 @@ namespace HouseRobbery.Client
 
             cameraManager.DisableCamerasInRadius(pos, 10f, 30f); // 10 meter radius, 30 second disable
             Screen.ShowNotification("Cameras disabled with EMP!");
+        }
+
+        [Command("setentry")]
+        public void SetEntryPoint(int source, List<object> args, string raw)
+        {
+            missionManager.GetMissionBuilder().SetEntryPoint();
+        }
+
+        [Command("setexit")]
+        public void SetExitPoint(int source, List<object> args, string raw)
+        {
+            missionManager.GetMissionBuilder().SetExitPoint();
+        }
+
+        [Command("setinteriorexit")]
+        public void SetInteriorExit(int source, List<object> args, string raw)
+        {
+            missionManager.GetMissionBuilder().SetInteriorExitPoint();
+        }
+
+
+        [Command("printmission")]
+        public void PrintMission(int source, List<object> args, string raw)
+        {
+            missionManager.GetMissionBuilder().PrintMissionData();
+        }
+
+        [Command("selectmission")]
+        public void SelectMission(int source, List<object> args, string raw)
+        {
+            if (args.Count < 1)
+            {
+                Screen.ShowNotification("Usage: /selectmission [missionId]");
+                return;
+            }
+
+            string missionId = args[0].ToString();
+            missionManager.GetMissionBuilder().SetCurrentMission(missionId);
+        }
+
+        [Command("startmission")]
+        public void StartMission(int source, List<object> args, string raw)
+        {
+            string missionId = args.Count > 0 ? args[0].ToString() : "house1";
+            missionManager.StartMission(missionId);
+        }
+
+        [Command("endmission")]
+        public void EndMission(int source, List<object> args, string raw)
+        {
+            missionManager.ForceEndMission();
+        }
+
+        [Command("tpexterior")]
+        public void TeleportExterior(int source, List<object> args, string raw)
+        {
+            missionManager.TeleportToExterior();
+        }
+
+        [Command("tpinterior")]
+        public void TeleportInterior(int source, List<object> args, string raw)
+        {
+            missionManager.TeleportToInterior();
         }
 
 
@@ -204,10 +301,19 @@ namespace HouseRobbery.Client
                 }
             }
 
-            // Check for loot pickup
+            // Check for loot pickup and draw markers
             foreach (var loot in lootManager.LootItems)
             {
                 if (loot.IsDepleted) continue;
+
+                // Draw loot marker
+                int markerColor = GetLootMarkerColor(loot.Type);
+                DrawMarker(1, loot.Position.X, loot.Position.Y, loot.Position.Z - 1.0f, 0, 0, 0, 0, 0, 0,
+                          1.0f, 1.0f, 0.5f, markerColor, 255, 0, 150, false, true, 2, false, null, null, false);
+
+                // Draw 3D text above loot
+                DrawLootText(loot.Position + new Vector3(0, 0, 1f), $"{loot.Type} x{loot.Remaining}", 255, 255, 255, 0.4f);
+
                 float dist = GetDistanceBetweenCoords(playerPos.X, playerPos.Y, playerPos.Z, loot.Position.X, loot.Position.Y, loot.Position.Z, true);
                 if (dist < 1.5f)
                 {
@@ -221,21 +327,23 @@ namespace HouseRobbery.Client
             }
 
             // Check for unloading at car
-            playerPed = PlayerPedId();
-            int vehicle = GetVehiclePedIsIn(playerPed, false);
-
-            if (DoesEntityExist(vehicle) && lootManager.CurrentCarried > 0)
-            {
-                Screen.DisplayHelpTextThisFrame("Press ~INPUT_CONTEXT~ to unload loot in your vehicle");
-                if (IsControlJustPressed(0, 51))
-                {
-                    lootManager.UnloadLoot();
-                    Screen.ShowNotification("Loot unloaded!");
-                }
-            }
+            //playerPed = PlayerPedId();
+            //int vehicle = GetVehiclePedIsIn(playerPed, false);
+            //
+            //if (DoesEntityExist(vehicle) && lootManager.CurrentCarried > 0)
+            //{
+            //    Screen.DisplayHelpTextThisFrame("Press ~INPUT_CONTEXT~ to unload loot in your vehicle");
+            //    if (IsControlJustPressed(0, 51))
+            //    {
+            //        lootManager.UnloadLoot();
+            //        Screen.ShowNotification("Loot unloaded!");
+            //    }
+            //}
 
             cameraManager.Update();
             cameraManager.DrawCameras();
+
+            missionManager.Update();
 
 
             await Task.FromResult(0);
@@ -248,6 +356,45 @@ namespace HouseRobbery.Client
             // TODO: Implement lockpicking minigame
             // TODO: Check if house is already robbed
             // TODO: Start alarm timer
+        }
+
+        private int GetLootMarkerColor(string lootType)
+        {
+            switch (lootType.ToLower())
+            {
+                case "cash": return 2; // Green
+                case "jewelry":
+                case "jewelery": return 3; // Blue
+                case "painting": return 5; // Yellow
+                case "electronics": return 6; // Red
+                case "drugs": return 8; // Purple
+                default: return 0; // White
+            }
+        }
+
+        private void DrawLootText(Vector3 position, string text, int r, int g, int b, float scale)
+        {
+            Vector3 camPos = GetGameplayCamCoord();
+            float distance = GetDistanceBetweenCoords(camPos.X, camPos.Y, camPos.Z, position.X, position.Y, position.Z, true);
+
+            if (distance > 10f) return;
+
+            SetTextScale(0.0f, scale);
+            SetTextFont(0);
+            SetTextProportional(true);
+            SetTextColour(r, g, b, 255);
+            SetTextDropShadow();
+            SetTextOutline();
+            SetTextEntry("STRING");
+            AddTextComponentString(text);
+
+            float screenX = 0f;
+            float screenY = 0f;
+            bool onScreen = GetScreenCoordFromWorldCoord(position.X, position.Y, position.Z, ref screenX, ref screenY);
+            if (onScreen)
+            {
+                DrawText(screenX, screenY);
+            }
         }
     }
 }

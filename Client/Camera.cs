@@ -24,26 +24,37 @@ namespace HouseRobbery.Client
         private float disableTimer;
         private float maxDisableTime;
 
-        public Camera(Vector3 position, Vector3 pointA, Vector3 pointB, float scanSpeed = 2f,
-                     float waitTime = 3f, float detectionRange = 15f, float viewAngle = 60f)
+        public Camera(Vector3 position, float rotation, float detectionRange = 15f, float viewAngle = 60f,
+             float scanAngle = 45f, float scanSpeed = 2f, float waitTime = 3f)
         {
             Position = position;
-            PointA = pointA;
-            PointB = pointB;
-            ScanSpeed = scanSpeed;
-            WaitTime = waitTime;
             DetectionRange = detectionRange;
             ViewAngle = viewAngle;
+            ScanSpeed = scanSpeed;
+            WaitTime = waitTime;
             IsActive = true;
             IsDisabled = false;
 
-            // Calculate initial rotation toward Point A
-            Vector3 direction = PointA - Position;
-            currentRotation = (float)(Math.Atan2(direction.Y, direction.X) * 180.0 / Math.PI);
-            targetRotation = currentRotation;
+            // Calculate Point A and B based on rotation and scan angle
+            float leftRotation = rotation - (scanAngle / 2f);
+            float rightRotation = rotation + (scanAngle / 2f);
+
+            PointA = position + new Vector3(
+                (float)Math.Cos(leftRotation * Math.PI / 180f) * detectionRange * 0.8f,
+                (float)Math.Sin(leftRotation * Math.PI / 180f) * detectionRange * 0.8f,
+                0f
+            );
+
+            PointB = position + new Vector3(
+                (float)Math.Cos(rightRotation * Math.PI / 180f) * detectionRange * 0.8f,
+                (float)Math.Sin(rightRotation * Math.PI / 180f) * detectionRange * 0.8f,
+                0f
+            );
+
+            // Start facing left point
+            currentRotation = leftRotation;
+            targetRotation = leftRotation;
             scanningToB = false;
-            waitTimer = 0f;
-            isWaiting = false;
         }
 
         public void Update(float deltaTime)
