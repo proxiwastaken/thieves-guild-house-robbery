@@ -28,13 +28,59 @@ namespace HouseRobbery.Client
         public void HandleNuiInput(string key)
         {
             if (!isActive) return;
-            if (key == "KeyA") lockpickAngle = Math.Max(0f, lockpickAngle - 2f);
-            if (key == "KeyD") lockpickAngle = Math.Min(180f, lockpickAngle + 2f);
-            if (key == "KeyW") isApplyingTension = true;
-            if (key == "KeyS") CompleteLockpicking(false);
 
-            // Update NUI after input
-            SendNuiMessage($"{{\"action\":\"update\",\"lockpicks\":{lockpicks},\"health\":{(int)lockpickHealth},\"angle\":{(int)lockpickAngle}}}");
+            // Movement
+            if (key == "KeyA")
+            {
+                lockpickAngle = Math.Max(0f, lockpickAngle - 2f);
+            }
+            if (key == "KeyD")
+            {
+                lockpickAngle = Math.Min(180f, lockpickAngle + 2f);
+            }
+
+            // Tension
+            if (key == "KeyW")
+            {
+                if (!isApplyingTension)
+                {
+                    isApplyingTension = true;
+                }
+
+                float distanceFromSweetSpot = Math.Abs(lockpickAngle - sweetSpot);
+
+                if (distanceFromSweetSpot <= sweetSpotRange)
+                {
+                    lockRotation += 1.5f; // Successful tension
+
+                    if (lockRotation >= maxLockRotation)
+                    {
+                        CompleteLockpicking(true);
+                        return;
+                    }
+                }
+                else
+                {
+                    // Failed tension, damage lockpick
+                    float damageMultiplier = Math.Min(distanceFromSweetSpot / sweetSpotRange, 3f);
+                    lockpickHealth -= damageMultiplier;
+
+                    if (lockpickHealth <= 0f)
+                    {
+                        BreakLockpick();
+                        return;
+                    }
+                }
+            }
+
+            // Exit
+            if (key == "KeyS")
+            {
+                CompleteLockpicking(false);
+            }
+
+            // Update NUI after input with lock rotation
+            SendNuiMessage($"{{\"action\":\"update\",\"lockpicks\":{lockpicks},\"health\":{(int)lockpickHealth},\"angle\":{(int)lockpickAngle},\"lockRotation\":{lockRotation}}}");
         }
 
 
@@ -78,72 +124,6 @@ namespace HouseRobbery.Client
             }
         }
 
-        public async Task HandleInput()
-        {
-            if (!isActive) return;
-
-            // Lockpicking movement
-            if (IsControlPressed(0, 34)) // A key
-            {
-                lockpickAngle = Math.Max(0f, lockpickAngle - 2f); // clamp to 0, rotate left
-            }
-            if (IsControlPressed(0, 35)) // D key
-            {
-                lockpickAngle = Math.Min(180f, lockpickAngle + 2f); // clamp to 180, rotate right
-            }
-
-            // Tension
-            if (IsControlPressed(0, 32)) // W key
-            {
-                if (!isApplyingTension)
-                {
-                    isApplyingTension = true;
-                }
-
-                float distanceFromSweetSpot = Math.Abs(lockpickAngle - sweetSpot);
-
-                if (distanceFromSweetSpot <= sweetSpotRange)
-                {
-                    lockRotation += 1.5f; // Successful tension
-
-                    if (lockRotation >= maxLockRotation)
-                    {
-                        CompleteLockpicking(true);
-                        return;
-                    }
-                }
-                else
-                {
-                    // Failed tension, damage lockpick
-                    float damageMultiplier = Math.Min(distanceFromSweetSpot / sweetSpotRange, 3f);
-                    lockpickHealth -= damageMultiplier;
-
-                    if (lockpickHealth <= 0f)
-                    {
-                        BreakLockpick();
-                        return;
-                    }
-                }
-            }
-            else
-            {
-                if (isApplyingTension)
-                {
-                    isApplyingTension = false;
-                    lockRotation = Math.Max(0f, lockRotation - 3f); // Lose some progress when tension is released
-                }
-            }
-
-            // Exit lockpicking
-            if (IsControlJustPressed(0, 33)) // S key
-            {
-                CompleteLockpicking(false);
-                return;
-            }
-
-            await Task.FromResult(0);
-        }
-
         private void CompleteLockpicking(bool success)
         {
             isActive = false;
@@ -152,11 +132,13 @@ namespace HouseRobbery.Client
 
             if (success)
             {
-                Screen.ShowNotification("~g~Lock picked successfully! House unlocked.");
+                Screen.ShowNotification("~g~Lock picked successfully!");
+                // Don't show "House unlocked" here since MissionManager will handle it
             }
             else
             {
-                Screen.ShowNotification("~r~Lockpicking failed.");
+                Screen.ShowNotification("~r~Lockpicking failed!");
+                // MissionManager will handle mission failure
             }
 
             OnLockpickingComplete?.Invoke(success);

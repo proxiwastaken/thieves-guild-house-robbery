@@ -23,8 +23,15 @@ namespace HouseRobbery.Client
 
         public void ClearCameras()
         {
+            // Clean up camera objects before clearing the list
+            foreach (var camera in Cameras)
+            {
+                camera.Cleanup();
+            }
+
             Cameras.Clear();
         }
+
 
         public void Update()
         {
@@ -57,53 +64,131 @@ namespace HouseRobbery.Client
             }
         }
 
+
         private void DrawCamera(Camera camera)
         {
-            // Draw camera position marker
-            int color = camera.IsDisabled ? 2 : (camera.IsActive ? 1 : 0); // Blue if disabled, Red if active, White if inactive
-            int r = camera.IsDisabled ? 0 : (camera.IsActive ? 255 : 255);
-            int g = camera.IsDisabled ? 100 : (camera.IsActive ? 0 : 255);
-            int b = camera.IsDisabled ? 255 : (camera.IsActive ? 0 : 255);
+            // Don't draw anything if camera doesn't exist
+            if (!camera.IsActive && !camera.IsDisabled) return;
 
-            DrawMarker(28, camera.Position.X, camera.Position.Y, camera.Position.Z + 0.1f,
-                      0, 0, 0, 0, 0, 0, 0.5f, 0.5f, 0.5f, r, g, b, 200, false, true, 2, false, null, null, false);
+            // Draw transparent red frustum instead of lines
+            if (!camera.IsDisabled && camera.IsActive)
+            {
+                DrawCameraFrustum(camera);
+            }
 
             if (camera.IsDisabled)
             {
-                // Show disable timer
+                // Show disable timer above the camera
                 float timeLeft = camera.GetDisableTimeRemaining();
-                DrawText3D(camera.Position + new Vector3(0, 0, 1f), $"Disabled: {timeLeft:F1}s", 255, 255, 255, 0.4f);
-                return;
+                DrawText3D(camera.Position + new Vector3(0, 0, 2f), $"Disabled: {timeLeft:F1}s", 255, 255, 255, 0.4f);
             }
-
-            if (!camera.IsActive) return;
-
-            // Draw view cone
-            Vector3 viewDir = camera.GetViewDirection();
-            float halfAngle = camera.ViewAngle / 2f;
-
-            // Calculate cone edges
-            Vector3 leftEdge = RotateVector(viewDir, -halfAngle) * camera.DetectionRange;
-            Vector3 rightEdge = RotateVector(viewDir, halfAngle) * camera.DetectionRange;
-            Vector3 centerRay = viewDir * camera.DetectionRange;
-
-            Vector3 leftPoint = camera.Position + leftEdge;
-            Vector3 rightPoint = camera.Position + rightEdge;
-            Vector3 centerPoint = camera.Position + centerRay;
-
-            // Draw view cone lines
-            DrawLine(camera.Position.X, camera.Position.Y, camera.Position.Z,
-                    leftPoint.X, leftPoint.Y, leftPoint.Z, 255, 0, 0, 150);
-            DrawLine(camera.Position.X, camera.Position.Y, camera.Position.Z,
-                    rightPoint.X, rightPoint.Y, rightPoint.Z, 255, 0, 0, 150);
-            DrawLine(leftPoint.X, leftPoint.Y, leftPoint.Z,
-                    rightPoint.X, rightPoint.Y, rightPoint.Z, 255, 0, 0, 100);
-
-            // Draw center line brighter
-            DrawLine(camera.Position.X, camera.Position.Y, camera.Position.Z,
-                    centerPoint.X, centerPoint.Y, centerPoint.Z, 255, 255, 0, 200);
         }
 
+        private void DrawCameraFrustum(Camera camera)
+        {
+            float halfAngle = camera.ViewAngle / 2f;
+            float range = camera.DetectionRange;
+
+            // Use the camera's current rotation (in degrees)
+            float baseRot = camera.GetCurrentRotation(); // Add this getter if needed
+
+            // Calculate left and right edge directions
+            float leftRot = baseRot - halfAngle;
+            float rightRot = baseRot + halfAngle;
+
+            Vector3 cameraPos = camera.Position + new Vector3(0, 0, 0.5f); // Slightly elevated
+
+            Vector3 leftDir = new Vector3(
+                (float)Math.Cos(leftRot * Math.PI / 180f),
+                (float)Math.Sin(leftRot * Math.PI / 180f),
+                0f
+            );
+            Vector3 rightDir = new Vector3(
+                (float)Math.Cos(rightRot * Math.PI / 180f),
+                (float)Math.Sin(rightRot * Math.PI / 180f),
+                0f
+            );
+            Vector3 centerDir = new Vector3(
+                (float)Math.Cos(baseRot * Math.PI / 180f),
+                (float)Math.Sin(baseRot * Math.PI / 180f),
+                0f
+            );
+
+            Vector3 leftPoint = cameraPos + leftDir * range;
+            Vector3 rightPoint = cameraPos + rightDir * range;
+            Vector3 centerPoint = cameraPos + centerDir * range;
+
+            DrawFrustumTriangle(cameraPos, leftPoint, rightPoint, centerPoint, camera.IsDisabled);
+        }
+
+        private void DrawThickLine(Vector3 start, Vector3 end, int r, int g, int b, int alpha, float thickness = 0.05f, int steps = 4)
+        {
+            // Draw the main line
+            DrawLine(start.X, start.Y, start.Z, end.X, end.Y, end.Z, r, g, b, alpha);
+
+            // Draw parallel offset lines for thickness
+            Vector3 dir = end - start;
+            Vector3 up = new Vector3(0, 0, 1f);
+            Vector3 side = Vector3.Cross(dir, up);
+            if (side.LengthSquared() < 0.001f) // If looking straight up/down, use X axis
+                side = new Vector3(1, 0, 0);
+            side = Vector3.Normalize(side);
+
+            float half = thickness / 2f;
+            for (int i = 1; i <= steps; i++)
+            {
+                float offset = half * ((float)i / steps);
+                // Both sides
+                Vector3 offsetVec = side * offset;
+                DrawLine((start + offsetVec).X, (start + offsetVec).Y, (start + offsetVec).Z, (end + offsetVec).X, (end + offsetVec).Y, (end + offsetVec).Z, r, g, b, alpha);
+                DrawLine((start - offsetVec).X, (start - offsetVec).Y, (start - offsetVec).Z, (end - offsetVec).X, (end - offsetVec).Y, (end - offsetVec).Z, r, g, b, alpha);
+            }
+        }
+
+        private void DrawFrustumTriangle(Vector3 apex, Vector3 left, Vector3 right, Vector3 center, bool disabled)
+        {
+            // Color and transparency
+            int r = disabled ? 100 : 255;
+            int g = disabled ? 100 : 0;
+            int b = disabled ? 255 : 0;
+            int alpha = disabled ? 40 : 100;
+
+            float thickness = 0.10f;
+
+            // Draw triangle edges
+            DrawThickLine(apex, left, r, g, b, alpha, thickness);
+            DrawThickLine(apex, right, r, g, b, alpha, thickness);
+            DrawThickLine(left, right, r, g, b, alpha, thickness);
+
+            // Fill the triangle with semi-transparent lines for a "frustum" effect
+            int fillLines = 12;
+            for (int i = 1; i < fillLines; i++)
+            {
+                float t = (float)i / fillLines;
+                Vector3 fillStart = Vector3.Lerp(left, apex, t);
+                Vector3 fillEnd = Vector3.Lerp(right, apex, t);
+                DrawThickLine(fillStart, fillEnd, r, g, b, alpha / 2, thickness / 2);
+            }
+        }
+
+
+
+        // dont use, kept for reference
+        private void DrawTransparentLine(Vector3 start, Vector3 end, int r, int g, int b, int alpha)
+        {
+            // Create multiple small markers along the line to simulate transparency
+            int points = 10;
+            for (int i = 0; i <= points; i++)
+            {
+                float t = (float)i / points;
+                Vector3 point = Vector3.Lerp(start, end, t);
+
+                DrawMarker(28, point.X, point.Y, point.Z, 0, 0, 0, 0, 0, 0,
+                          0.3f, 0.3f, 0.2f, r, g, b, alpha, false, false, 2, false, null, null, false);
+            }
+        }
+
+        // dont use
         private Vector3 RotateVector(Vector3 vector, float angleInDegrees)
         {
             float radians = angleInDegrees * (float)(Math.PI / 180.0);
@@ -144,16 +229,11 @@ namespace HouseRobbery.Client
             }
         }
 
-
-
-
-
         private void TriggerAlarm()
         {
             if (alarmActive) return;
 
             alarmActive = true;
-            Screen.ShowNotification("~r~ALARM TRIGGERED! You've been detected!");
             OnAlarmTriggered?.Invoke();
         }
 

@@ -22,8 +22,8 @@ namespace HouseRobbery.Client
                 "house1",
                 new Vector3(885.8f, -515.7f, 57.3f),    // Exterior
                 new Vector3(261.4586f, -998.8196f, -99.00863f), // Interior
-                new Vector3(878.4f, -497.9f, 58.1f),     // Entry point (updated)
-                new Vector3(266.0f, -1007.6f, -101.0f)      // Exit point (same as entry)
+                new Vector3(878.4f, -497.9f, 58.1f),     // Entry point 
+                new Vector3(878.4f, -497.9f, 58.1f)      // Exit point
             );
 
             // Add default camera
@@ -49,7 +49,7 @@ namespace HouseRobbery.Client
 
             mission.Loot.Add(new LootData(
                 new Vector3(265.0f, -997.4f, -99.0f), // Position
-                "Jewelery", // Type (fixed spelling)
+                "Jewelery", // Type
                 2           // Amount
             ));
 
@@ -187,13 +187,15 @@ namespace HouseRobbery.Client
             Debug.WriteLine($"Exterior: new Vector3({mission.ExteriorPosition.X:F1}f, {mission.ExteriorPosition.Y:F1}f, {mission.ExteriorPosition.Z:F1}f)");
             Debug.WriteLine($"Interior: new Vector3({mission.InteriorPosition.X:F1}f, {mission.InteriorPosition.Y:F1}f, {mission.InteriorPosition.Z:F1}f)");
             Debug.WriteLine($"Entry: new Vector3({mission.EntryPoint.X:F1}f, {mission.EntryPoint.Y:F1}f, {mission.EntryPoint.Z:F1}f)");
-            Debug.WriteLine($"Exit: new Vector3({mission.ExitPoint.X:F1}f, {mission.ExitPoint.Y:F1}f, {mission.ExitPoint.Z:F1}f)"); // Add this line
+            Debug.WriteLine($"Exit: new Vector3({mission.ExitPoint.X:F1}f, {mission.ExitPoint.Y:F1}f, {mission.ExitPoint.Z:F1}f)");
+            Debug.WriteLine($"InteriorExit: new Vector3({mission.InteriorExitPoint.X:F1}f, {mission.InteriorExitPoint.Y:F1}f, {mission.InteriorExitPoint.Z:F1}f)"); // Add this line
             Debug.WriteLine($"Cameras: {mission.Cameras.Count}");
             Debug.WriteLine($"Loot: {mission.Loot.Count}");
             Debug.WriteLine("=================");
 
             Screen.ShowNotification("Mission data printed to F8 console");
         }
+
 
 
         public List<string> GetMissionIds()

@@ -42,7 +42,7 @@ namespace HouseRobbery.Client
         public Vector3 InteriorPosition { get; set; }
         public Vector3 EntryPoint { get; set; }
         public Vector3 ExitPoint { get; set; }
-        public Vector3 InteriorExitPoint { get; set; } // Add this line
+        public Vector3 InteriorExitPoint { get; set; }
         public List<CameraData> Cameras { get; set; } = new List<CameraData>();
         public List<LootData> Loot { get; set; } = new List<LootData>();
 
@@ -53,7 +53,7 @@ namespace HouseRobbery.Client
             InteriorPosition = interior;
             EntryPoint = entry;
             ExitPoint = exit.IsZero ? entry : exit;
-            InteriorExitPoint = new Vector3(266.0f, -1007.6f, -101.0f); // Default interior exit
+            InteriorExitPoint = new Vector3(266.0f, -1007.6f, -101.0f);
         }
     }
 

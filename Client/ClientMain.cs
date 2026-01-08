@@ -11,8 +11,8 @@ namespace HouseRobbery.Client
     {
         private readonly List<Vector3> houseLocations = new List<Vector3>
         {
-            new Vector3(-845.4f, 161.0f, 66.6f), // Example house location
-            // Add more house coordinates
+            //new Vector3(-845.4f, 161.0f, 66.6f), // Example house location
+            // remove this before monday deprecated
         };
 
         private bool nearHouse = false;
@@ -27,8 +27,7 @@ namespace HouseRobbery.Client
         private void OnAlarmTriggered()
         {
             // Handle alarm trigger - kick player out, spawn cops, etc.
-            Screen.ShowNotification("~r~SECURITY BREACH! Robbery failed!");
-            // TODO: Implement fail state from GDD
+            //Screen.ShowNotification("~r~SECURITY BREACH! Robbery failed!");
         }
 
         public ClientMain()
@@ -39,7 +38,7 @@ namespace HouseRobbery.Client
 
             cameraManager.OnAlarmTriggered += OnAlarmTriggered;
 
-            missionManager = new MissionManager(cameraManager, lootManager);
+            missionManager = new MissionManager(cameraManager, lootManager, lockpickingInstance);
             missionManager.OnMissionCompleted += (value) => Debug.WriteLine($"Mission completed with ${value}");
             missionManager.OnMissionFailed += () => Debug.WriteLine("Mission failed!");
 
@@ -179,7 +178,7 @@ namespace HouseRobbery.Client
             var playerPed = PlayerPedId();
             var pos = GetEntityCoords(playerPed, true);
 
-            cameraManager.DisableCamerasInRadius(pos, 10f, 30f); // 10 meter radius, 30 second disable
+            cameraManager.DisableCamerasInRadius(pos, 10f, 10f); // 10 meter radius, 10 second disable
             Screen.ShowNotification("Cameras disabled with EMP!");
         }
 
@@ -351,11 +350,8 @@ namespace HouseRobbery.Client
 
         private async Task StartRobberyAttempt()
         {
-            Screen.ShowNotification("Starting house robbery...");
-            lockpickingInstance.StartLockpicking();
-            // TODO: Implement lockpicking minigame
-            // TODO: Check if house is already robbed
-            // TODO: Start alarm timer
+            //Screen.ShowNotification("Starting house robbery...");
+            //lockpickingInstance.StartLockpicking();
         }
 
         private int GetLootMarkerColor(string lootType)

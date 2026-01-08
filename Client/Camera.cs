@@ -24,6 +24,9 @@ namespace HouseRobbery.Client
         private float disableTimer;
         private float maxDisableTime;
 
+        private int cameraObject = 0;
+        private uint cameraModel = 0;
+
         public Camera(Vector3 position, float rotation, float detectionRange = 15f, float viewAngle = 60f,
              float scanAngle = 45f, float scanSpeed = 2f, float waitTime = 3f)
         {
@@ -55,6 +58,48 @@ namespace HouseRobbery.Client
             currentRotation = leftRotation;
             targetRotation = leftRotation;
             scanningToB = false;
+
+            InitializeCameraProp();
+        }
+
+        private async void InitializeCameraProp()
+        {
+            cameraModel = (uint)GetHashKey("prop_pap_camera_01"); // Example camera prop model
+            RequestModel(cameraModel);
+
+            // Wait for model to load
+            int attempts = 0;
+            while (!HasModelLoaded(cameraModel) && attempts < 50)
+            {
+                await BaseScript.Delay(100);
+                attempts++;
+            }
+
+            if (HasModelLoaded(cameraModel))
+            {
+                // Create the camera object
+                cameraObject = CreateObject((int)cameraModel, Position.X, Position.Y, Position.Z, false, false, false);
+
+                if (DoesEntityExist(cameraObject))
+                {
+                    // Set initial rotation
+                    SetEntityRotation(cameraObject, 0f, 0f, currentRotation, 2, true);
+
+                    // Make it mission entity so it doesn't despawn
+                    SetEntityAsMissionEntity(cameraObject, true, true);
+
+                    // Freeze it in place
+                    FreezeEntityPosition(cameraObject, true);
+
+                    Debug.WriteLine($"[CAMERA] Spawned camera prop at {Position}");
+                }
+            }
+            else
+            {
+                Debug.WriteLine("[CAMERA] Failed to load camera model");
+            }
+
+            SetModelAsNoLongerNeeded(cameraModel);
         }
 
         public void Update(float deltaTime)
@@ -107,6 +152,22 @@ namespace HouseRobbery.Client
                 if (currentRotation >= 360f) currentRotation -= 360f;
                 if (currentRotation < 0f) currentRotation += 360f;
             }
+
+            UpdateCameraRotation();
+        }
+
+        private void UpdateCameraRotation()
+        {
+            if (cameraObject != 0 && DoesEntityExist(cameraObject))
+            {
+                // Only rotate around Z (yaw)
+                SetEntityRotation(cameraObject, 0f, 0f, currentRotation, 2, true);
+            }
+        }
+
+        public float GetCurrentRotation()
+        {
+            return currentRotation;
         }
 
         public bool IsPlayerDetected(Vector3 playerPos)
@@ -148,5 +209,15 @@ namespace HouseRobbery.Client
             float radians = currentRotation * (float)(Math.PI / 180.0);
             return new Vector3((float)Math.Cos(radians), (float)Math.Sin(radians), 0f);
         }
+
+        public void Cleanup()
+        {
+            if (cameraObject != 0 && DoesEntityExist(cameraObject))
+            {
+                DeleteEntity(ref cameraObject);
+                cameraObject = 0;
+            }
+        }
     }
+
 }
