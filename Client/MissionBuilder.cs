@@ -20,37 +20,49 @@ namespace HouseRobbery.Client
         {
             var mission = new MissionData(
                 "house1",
-                new Vector3(885.8f, -515.7f, 57.3f),    // Exterior
-                new Vector3(261.4586f, -998.8196f, -99.00863f), // Interior
-                new Vector3(878.4f, -497.9f, 58.1f),     // Entry point 
-                new Vector3(878.4f, -497.9f, 58.1f)      // Exit point
+                new Vector3(910.8f, -502.9f, 58.4f),    // Exterior
+                new Vector3(266.3f, -1006.6f, -100.6f), // Interior
+                new Vector3(899.6f, -474.0f, 59.4f),     // Entry point 
+                new Vector3(899.6f, -474.0f, 59.4f)      // Exit point
             );
 
             // Add default camera
             mission.Cameras.Add(new CameraData(
-                new Vector3(886.2f, -493.4f, 57.6f), // Position
-                270f, // Rotation
-                15f   // DetectionRange
+                new Vector3(911.4f, -488.2f, 62.1f), // Position
+                250f, // Rotation
+                12f   // DetectionRange
+            ));
+
+            mission.Cameras.Add(new CameraData(
+                new Vector3(261.9f, -995.4f, -99.0f),
+                210f,
+                6f
             ));
 
             // Add default loot - exterior
             mission.Loot.Add(new LootData(
-                new Vector3(879.7f, -491.7f, 57.5f), // Position
-                "Cash", // Type
-                5       // Amount
+                new Vector3(902.4f, -475.0f, 59.0f), // Position
+                "Electronics", // Type
+                1       // Amount
             ));
 
             // Add default loot - interior
             mission.Loot.Add(new LootData(
-                new Vector3(256.9f, -997.8f, -99.0f), // Position
-                "Drugs", // Type
+                new Vector3(263.0f, -1003.0f, -99.0f), // Position
+                "Electronics", // Type
                 1        // Amount
             ));
 
             mission.Loot.Add(new LootData(
                 new Vector3(265.0f, -997.4f, -99.0f), // Position
-                "Jewelery", // Type
+                "Jewelry", // Type
                 2           // Amount
+            ));
+
+            mission.Loot.Add(new LootData(
+                new Vector3(256.1f, -1000.7f, -99.0f), // Position
+                "Cash", // Type
+                3           // Amount
             ));
 
             missions["house1"] = mission;
@@ -188,7 +200,7 @@ namespace HouseRobbery.Client
             Debug.WriteLine($"Interior: new Vector3({mission.InteriorPosition.X:F1}f, {mission.InteriorPosition.Y:F1}f, {mission.InteriorPosition.Z:F1}f)");
             Debug.WriteLine($"Entry: new Vector3({mission.EntryPoint.X:F1}f, {mission.EntryPoint.Y:F1}f, {mission.EntryPoint.Z:F1}f)");
             Debug.WriteLine($"Exit: new Vector3({mission.ExitPoint.X:F1}f, {mission.ExitPoint.Y:F1}f, {mission.ExitPoint.Z:F1}f)");
-            Debug.WriteLine($"InteriorExit: new Vector3({mission.InteriorExitPoint.X:F1}f, {mission.InteriorExitPoint.Y:F1}f, {mission.InteriorExitPoint.Z:F1}f)"); // Add this line
+            Debug.WriteLine($"InteriorExit: new Vector3({mission.InteriorExitPoint.X:F1}f, {mission.InteriorExitPoint.Y:F1}f, {mission.InteriorExitPoint.Z:F1}f)");
             Debug.WriteLine($"Cameras: {mission.Cameras.Count}");
             Debug.WriteLine($"Loot: {mission.Loot.Count}");
             Debug.WriteLine("=================");

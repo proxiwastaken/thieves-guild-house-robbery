@@ -24,6 +24,11 @@ namespace HouseRobbery.Client
         private CameraManager cameraManager = new CameraManager();
         private MissionManager missionManager;
 
+        private float lastGrenadeThrowTime = 0f;
+
+        private bool hasStartedIntro = false;
+        private bool phoneCreated = false;
+
         private void OnAlarmTriggered()
         {
             // Handle alarm trigger - kick player out, spawn cops, etc.
@@ -53,6 +58,10 @@ namespace HouseRobbery.Client
                 }
                 cb(new { ok = true });
             });
+
+            EventHandlers["explosionEvent"] += new Action<int, float, float, float, bool, uint, float>(OnExplosion);
+
+            StartIntroSequence();
         }
 
         [Command("getcoords")]
@@ -311,7 +320,11 @@ namespace HouseRobbery.Client
                           1.0f, 1.0f, 0.5f, markerColor, 255, 0, 150, false, true, 2, false, null, null, false);
 
                 // Draw 3D text above loot
-                DrawLootText(loot.Position + new Vector3(0, 0, 1f), $"{loot.Type} x{loot.Remaining}", 255, 255, 255, 0.4f);
+                // Get color for text to match marker
+                var textColor = GetLootTextColor(loot.Type);
+                DrawLootText(loot.Position + new Vector3(0, 0, 1f), $"~{textColor}~{loot.Type}~w~ x{loot.Remaining}", 255, 255, 255, 0.4f);
+
+
 
                 float dist = GetDistanceBetweenCoords(playerPos.X, playerPos.Y, playerPos.Z, loot.Position.X, loot.Position.Y, loot.Position.Z, true);
                 if (dist < 1.5f)
@@ -344,6 +357,7 @@ namespace HouseRobbery.Client
 
             missionManager.Update();
 
+            missionManager.DrawUI();
 
             await Task.FromResult(0);
         }
@@ -368,6 +382,20 @@ namespace HouseRobbery.Client
             }
         }
 
+        private string GetLootTextColor(string lootType)
+        {
+            switch (lootType.ToLower())
+            {
+                case "cash": return "g";        // Green
+                case "jewelry":
+                case "jewelery": return "b";    // Blue
+                case "painting": return "y";    // Yellow  
+                case "electronics": return "r"; // Red
+                case "drugs": return "p";       // Purple
+                default: return "w";            // White
+            }
+        }
+
         private void DrawLootText(Vector3 position, string text, int r, int g, int b, float scale)
         {
             Vector3 camPos = GetGameplayCamCoord();
@@ -375,22 +403,123 @@ namespace HouseRobbery.Client
 
             if (distance > 10f) return;
 
-            SetTextScale(0.0f, scale);
-            SetTextFont(0);
-            SetTextProportional(true);
-            SetTextColour(r, g, b, 255);
-            SetTextDropShadow();
-            SetTextOutline();
-            SetTextEntry("STRING");
-            AddTextComponentString(text);
-
             float screenX = 0f;
             float screenY = 0f;
             bool onScreen = GetScreenCoordFromWorldCoord(position.X, position.Y, position.Z, ref screenX, ref screenY);
+
             if (onScreen)
             {
+                // Set up text rendering
+                SetTextFont(0);
+                SetTextProportional(true);
+                SetTextScale(0.0f, scale);
+                SetTextColour(r, g, b, 255);
+                SetTextDropShadow();
+                SetTextOutline();
+                SetTextCentre(true); // Center the text
+                SetTextEntry("STRING");
+                AddTextComponentString(text);
+
                 DrawText(screenX, screenY);
             }
+        }
+
+
+        private void OnExplosion(int source, float x, float y, float z, bool isEntityDamaged, uint damageEntity, float damageScale)
+        {
+            Vector3 explosionPos = new Vector3(x, y, z);
+
+            Debug.WriteLine($"[EXPLOSION] Detected at {explosionPos}, source: {source}, damage scale: {damageScale}");
+
+            if (missionManager.IsMissionActive)
+            {
+                // Check if this explosion is near the player
+                var playerPos = GetEntityCoords(PlayerPedId(), true);
+                float distanceToPlayer = GetDistanceBetweenCoords(explosionPos.X, explosionPos.Y, explosionPos.Z,
+                                                                 playerPos.X, playerPos.Y, playerPos.Z, true);
+
+                // If explosion is within reasonable throwing distance and we have EMP grenades
+                if (distanceToPlayer < 50f && missionManager.HasEMPGrenades())
+                {
+                    // Check if player recently threw a grenade
+                    if (WasRecentGrenadeThrow())
+                    {
+                        //Debug.WriteLine("[EMP] Converting grenade explosion to EMP");
+
+                        missionManager.OnGrenadeExplosion(explosionPos);
+                    }
+                }
+            }
+        }
+
+        private bool WasRecentGrenadeThrow()
+        {
+            float currentTime = GetGameTimer() / 1000f;
+
+            // if a grenade was thrown in the last 5 seconds
+            if (currentTime - lastGrenadeThrowTime < 5f)
+            {
+                return true;
+            }
+
+            // Also check if player currently has grenade weapon selected
+            var playerPed = PlayerPedId();
+            uint currentWeapon = 0;
+            GetCurrentPedWeapon(playerPed, ref currentWeapon, true);
+
+            uint grenadeWeapon = (uint)GetHashKey("weapon_grenade");
+            if (currentWeapon == grenadeWeapon)
+            {
+                lastGrenadeThrowTime = currentTime;
+                return true;
+            }
+
+            return false;
+        }
+
+        // Intro sequence
+        private async void StartIntroSequence()
+        {
+            if (hasStartedIntro) return;
+            hasStartedIntro = true;
+
+            // Wait for everything to initialize
+            await BaseScript.Delay(3000);
+
+            // Welcome message
+            Screen.ShowNotification("~b~Welcome to Thieves Guild!~w~");
+            await BaseScript.Delay(2000);
+
+            // Mission briefing
+            SendMissionBriefing();
+            await BaseScript.Delay(3000);
+
+            // Auto-start mission
+            Screen.ShowNotification("~b~Starting your first mission...~w~");
+            await BaseScript.Delay(1500);
+
+            missionManager.StartMission("house1");
+        }
+
+        // Mission briefing
+        private async void SendMissionBriefing()
+        {
+            // First notification - Mission basics
+            BeginTextCommandThefeedPost("STRING");
+            AddTextComponentString("~y~TARGET:~w~ Residential property\n" +
+                                  "~y~OBJECTIVE:~w~ Steal valuables without detection");
+            EndTextCommandThefeedPostMessagetext("CHAR_LJT", "CHAR_LJT", false, 4, "Thieves Guild", "Mission Briefing");
+
+            await BaseScript.Delay(3000);
+
+            // Second notification - Equipment and warnings
+            BeginTextCommandThefeedPost("STRING");
+            AddTextComponentString("~g~EQUIPMENT:~w~ Lockpicks & EMP grenades\n" +
+                                  "~r~WARNING:~w~ Security cameras active!\n" +
+                                  "Good luck.");
+            EndTextCommandThefeedPostMessagetext("CHAR_LJT", "CHAR_LJT", false, 4, "Thieves Guild", "Equipment Info");
+
+            Debug.WriteLine("[MISSION] Mission briefing sent (2 parts)");
         }
     }
 }

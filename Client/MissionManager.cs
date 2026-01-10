@@ -35,13 +35,16 @@ namespace HouseRobbery.Client
 
         // Vehicle tracking
         private int playerLastVehicle = 0;
-        private Vector3 vehicleSpawnPoint = new Vector3(866.6f, -532.3f, 57.2f);
+        private Vector3 vehicleSpawnPoint = new Vector3(917.3f, -512.2f, 58.6f);
         private uint lastVehicleModel = 0;
         private float lastVehicleHeading = 0f;
 
         // lockpicking
         private Lockpicking lockpickingInstance;
         private bool isLockpickingActive = false;
+
+        // Grenade
+        private EMPGrenade empGrenade;
 
         // Mission components
         private CameraManager cameraManager;
@@ -64,6 +67,7 @@ namespace HouseRobbery.Client
             this.lootManager = lootManager;
             this.lockpickingInstance = lockpicking;
             this.missionBuilder = new MissionBuilder();
+            this.empGrenade = new EMPGrenade(cameraManager);
 
             // Subscribe to alarm events
             cameraManager.OnAlarmTriggered += OnAlarmTriggered;
@@ -105,10 +109,28 @@ namespace HouseRobbery.Client
             CreateMapBlip();
             ShowMissionStartText();
 
+            empGrenade.GiveGrenades(2);
+
+            GivePlayerSilencedPistol();
+
             OnMissionStateChanged?.Invoke(CurrentState);
             Screen.ShowNotification($"~g~Mission '{missionId}' Started!");
         }
 
+        private void GivePlayerSilencedPistol()
+        {
+            var playerPed = PlayerPedId();
+
+            // Give silenced pistol with ammo
+            uint silencedPistolHash = (uint)GetHashKey("weapon_pistol");
+            GiveWeaponToPed(playerPed, silencedPistolHash, 120, false, true);
+
+            // Add suppressor component
+            uint suppressorHash = (uint)GetHashKey("COMPONENT_AT_PI_SUPP_02");
+            GiveWeaponComponentToPed(playerPed, silencedPistolHash, suppressorHash);
+
+            Debug.WriteLine("[MISSION] Player given silenced pistol with 120 rounds");
+        }
 
         private void CheckForCarUnloading()
         {
@@ -142,7 +164,7 @@ namespace HouseRobbery.Client
                     playerPos.X, playerPos.Y, playerPos.Z,
                     vehicleSpawnPoint.X, vehicleSpawnPoint.Y, vehicleSpawnPoint.Z, true);
 
-                if (distanceToSpawnPoint < 15.0f) // Increased range to 15 units
+                if (distanceToSpawnPoint < 15.0f)
                 {
                     nearVehicleSpawnPoint = true;
                 }
@@ -223,11 +245,33 @@ namespace HouseRobbery.Client
             }
         }
 
+        public void DrawUI()
+        {
+            if (IsMissionActive)
+            {
+                empGrenade.DrawUI();
+            }
+        }
 
+        public bool HasEMPGrenades()
+        {
+            return empGrenade != null && empGrenade.HasGrenades;
+        }
+
+        public void OnGrenadeExplosion(Vector3 position)
+        {
+            if (empGrenade != null)
+            {
+                // convert
+                empGrenade.OnExplosion(position, 0); // 0 = GRENADE explosion type
+            }
+        }
 
         public void Update()
         {
             if (!IsMissionActive) return;
+
+            empGrenade.Update();
 
             var playerPos = GetEntityCoords(PlayerPedId(), true);
             float distanceToHouse = GetDistanceBetweenCoords(playerPos.X, playerPos.Y, playerPos.Z,
@@ -502,12 +546,12 @@ namespace HouseRobbery.Client
 
         private void ShowMissionStartText()
         {
-            Screen.ShowNotification("~b~Thieves Guild:~w~ Looks like nobody's home, make sure it stays that way.");
+            //Screen.ShowNotification("~b~Thieves Guild:~w~ Looks like nobody's home, make sure it stays that way. We've supplied you with a couple EMP nades too.");
         }
 
         private void ShowHouseApproachText()
         {
-            Screen.ShowNotification("~b~Thieves Guild:~w~ Looks like you're about there, make sure you don't trip the alarm.");
+            Screen.ShowNotification("~b~Thieves Guild:~w~ Looks like you're about there, make sure you don't trip the alarm. Front door's too risky, head around the back.");
         }
 
         private void EnterHouse()
@@ -748,7 +792,7 @@ namespace HouseRobbery.Client
             StopAlarm("JEWEL_STORE_HEIST_ALARMS", true);
             StopAllAlarms(true);
 
-            // Also stop any prepared alarms
+            // Also stop any prepared alarms (idk if this necessary)
             if (IsAlarmPlaying("JEWEL_STORE_HEIST_ALARMS"))
             {
                 StopAlarm("JEWEL_STORE_HEIST_ALARMS", false);
@@ -764,7 +808,6 @@ namespace HouseRobbery.Client
             CurrentState = MissionState.Failed;
             OnMissionStateChanged?.Invoke(CurrentState);
 
-            // Immediate fade to black for interior detection
             DoScreenFadeOut(300);
 
             await BaseScript.Delay(500);
@@ -772,7 +815,7 @@ namespace HouseRobbery.Client
             var playerPed = PlayerPedId();
 
             // Teleport player outside immediately
-            SetEntityCoords(playerPed, houseExterior.X + 20f, houseExterior.Y, houseExterior.Z, false, false, false, true);
+            SetEntityCoords(playerPed, houseEntryPoint.X, houseEntryPoint.Y, houseEntryPoint.Z, false, false, false, true);
 
             // Spawn player's vehicle at the safe location
             SpawnPlayerVehicle();
@@ -857,6 +900,26 @@ namespace HouseRobbery.Client
             GiveWeaponToPed(cop1, (uint)GetHashKey("weapon_pistol"), 100, false, true);
             GiveWeaponToPed(cop2, (uint)GetHashKey("weapon_pistol"), 100, false, true);
 
+            // Set cop AI and behavior
+            SetupPoliceAI(cop1);
+            SetupPoliceAI(cop2);
+
+            // Get player reference
+            var playerPed = PlayerPedId();
+
+            // Make cops hostile to player and start combat
+            SetPedRelationshipGroupHash(cop1, (uint)GetHashKey("COP"));
+            SetPedRelationshipGroupHash(cop2, (uint)GetHashKey("COP"));
+            SetRelationshipBetweenGroups(5, (uint)GetHashKey("COP"), (uint)GetHashKey("PLAYER")); // 5 = hate
+
+            // Force cops to target and pursue player
+            SetPedAsEnemy(cop1, true);
+            SetPedAsEnemy(cop2, true);
+
+            // Make them aggressive and combat ready
+            TaskCombatPed(cop1, playerPed, 0, 16);
+            TaskCombatPed(cop2, playerPed, 0, 16);
+
             // Set wanted level to 3 stars
             SetPlayerWantedLevel(PlayerId(), 3, false);
             SetPlayerWantedLevelNow(PlayerId(), false);
@@ -867,7 +930,31 @@ namespace HouseRobbery.Client
             Debug.WriteLine("[MISSION] Police response spawned - 2 vehicles, 2 officers, 3 star wanted level");
         }
 
+        // Helper method to set up police AI
+        private void SetupPoliceAI(int copPed)
+        {
+            // Set ped as police type
+            SetPedAsCop(copPed, true);
 
+            // Configure AI behavior
+            SetPedCombatAttributes(copPed, 46, true);  // Can use vehicles
+            SetPedCombatAttributes(copPed, 5, true);   // Can fight armed peds when not armed
+            SetPedCombatAttributes(copPed, 1424, true); // Always fight
+            SetPedCombatAttributes(copPed, 3, false);  // Can't use cover
+
+            // Set combat movement
+            SetPedCombatMovement(copPed, 2); // Aggressive movement
+            SetPedCombatRange(copPed, 2);    // Long range combat
+
+            // Set accuracy and other stats
+            SetPedAccuracy(copPed, 75);      // Good accuracy
+            SetPedMaxHealth(copPed, 200);    // Extra health
+            SetPedArmour(copPed, 100);       // Give armor
+
+            // Make them fearless
+            SetPedFleeAttributes(copPed, 0, false);
+            SetPedCombatAttributes(copPed, 17, false); // Won't flee
+        }
 
 
         private int CalculateLootValue()

@@ -78,12 +78,13 @@ namespace HouseRobbery.Client
             if (HasModelLoaded(cameraModel))
             {
                 // Create the camera object
-                cameraObject = CreateObject((int)cameraModel, Position.X, Position.Y, Position.Z, false, false, false);
+                cameraObject = CreateObject((int)cameraModel, Position.X, Position.Y, Position.Z + 0.3f, false, false, false);
 
                 if (DoesEntityExist(cameraObject))
                 {
                     // Set initial rotation
-                    SetEntityRotation(cameraObject, 0f, 0f, currentRotation, 2, true);
+                    float adjustedRotation = currentRotation - 90f;
+                    SetEntityRotation(cameraObject, 0f, 0f, adjustedRotation, 2, true);
 
                     // Make it mission entity so it doesn't despawn
                     SetEntityAsMissionEntity(cameraObject, true, true);
@@ -161,7 +162,7 @@ namespace HouseRobbery.Client
             if (cameraObject != 0 && DoesEntityExist(cameraObject))
             {
                 // Only rotate around Z (yaw)
-                SetEntityRotation(cameraObject, 0f, 0f, currentRotation, 2, true);
+                SetEntityRotation(cameraObject, 0f, 0f, currentRotation + 90f, 2, true);
             }
         }
 
@@ -174,22 +175,38 @@ namespace HouseRobbery.Client
         {
             if (IsDisabled || !IsActive) return false;
 
-            // Check distance
             float distance = GetDistanceBetweenCoords(Position.X, Position.Y, Position.Z,
                                                     playerPos.X, playerPos.Y, playerPos.Z, true);
             if (distance > DetectionRange) return false;
 
-            // Check angle
+            // angle to player
             Vector3 toPlayer = playerPos - Position;
             float angleToPlayer = (float)(Math.Atan2(toPlayer.Y, toPlayer.X) * 180.0 / Math.PI);
 
-            // Normalize angles
-            if (angleToPlayer < 0f) angleToPlayer += 360f;
+            // Normalise
+            float normalizedCurrent = currentRotation;
+            while (normalizedCurrent < 0f) normalizedCurrent += 360f;
+            while (normalizedCurrent >= 360f) normalizedCurrent -= 360f;
 
-            float angleDifference = Math.Abs(angleToPlayer - currentRotation);
+            float normalizedPlayer = angleToPlayer;
+            while (normalizedPlayer < 0f) normalizedPlayer += 360f;
+            while (normalizedPlayer >= 360f) normalizedPlayer -= 360f;
+
+            float angleDifference = Math.Abs(normalizedPlayer - normalizedCurrent);
             if (angleDifference > 180f) angleDifference = 360f - angleDifference;
 
-            return angleDifference <= (ViewAngle / 2f);
+            // slightly smaller than visual frustum, being merciful to player
+            float detectionHalfAngle = (ViewAngle / 2f) * 0.98f;
+
+            bool detected = angleDifference <= detectionHalfAngle;
+
+            // Debug output for troubleshooting
+            if (distance < 5f) // Only debug when close
+            {
+                Debug.WriteLine($"[CAMERA] Player angle: {normalizedPlayer:F1}°, Camera: {normalizedCurrent:F1}°, Diff: {angleDifference:F1}°, Detected: {detected}");
+            }
+
+            return detected;
         }
 
         public void Disable(float duration)

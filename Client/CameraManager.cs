@@ -89,8 +89,7 @@ namespace HouseRobbery.Client
             float halfAngle = camera.ViewAngle / 2f;
             float range = camera.DetectionRange;
 
-            // Use the camera's current rotation (in degrees)
-            float baseRot = camera.GetCurrentRotation(); // Add this getter if needed
+            float baseRot = camera.GetCurrentRotation();
 
             // Calculate left and right edge directions
             float leftRot = baseRot - halfAngle;
