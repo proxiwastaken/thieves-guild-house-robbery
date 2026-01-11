@@ -521,5 +521,12 @@ namespace HouseRobbery.Client
 
             Debug.WriteLine("[MISSION] Mission briefing sent (2 parts)");
         }
+
+        [Command("setnight")]
+        public void SetNightTime(int source, List<object> args, string raw)
+        {
+            NetworkOverrideClockTime(23, 0, 0);
+            Screen.ShowNotification("~b~Time set to night (23:00).");
+        }
     }
 }
