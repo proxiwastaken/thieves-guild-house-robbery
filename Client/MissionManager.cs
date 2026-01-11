@@ -26,6 +26,11 @@ namespace HouseRobbery.Client
         private MissionBuilder missionBuilder;
         private MissionData currentMission;
 
+        // Auto-retry tracking
+        private bool waitingForWantedLevelClear = false;
+        private int lastWantedLevel = 0;
+        private bool hasCompletedMission = false;
+
         // Mission locations
         private Vector3 houseExterior = new Vector3(885.8f, -515.7f, 57.3f);
         private Vector3 houseInterior = new Vector3(261.4586f, -998.8196f, -99.00863f);
@@ -80,6 +85,12 @@ namespace HouseRobbery.Client
             if (IsMissionActive)
             {
                 Screen.ShowNotification("~r~Mission already active!");
+                return;
+            }
+
+            if (hasCompletedMission)
+            {
+                Screen.ShowNotification("~r~You have already completed this mission!");
                 return;
             }
 
@@ -267,9 +278,40 @@ namespace HouseRobbery.Client
             }
         }
 
+        private void CheckForAutoRetry()
+        {
+            // Only check if we're waiting for wanted level to clear
+            if (!waitingForWantedLevelClear || hasCompletedMission) return;
+
+            int currentWantedLevel = GetPlayerWantedLevel(PlayerId());
+
+            // If wanted level just cleared (was > 0, now = 0)
+            if (lastWantedLevel > 0 && currentWantedLevel == 0)
+            {
+                waitingForWantedLevelClear = false;
+
+                // Show retry message and auto-restart
+                Screen.ShowNotification("~g~Wanted level cleared! Restarting mission...");
+
+                // Small delay then restart
+                BaseScript.Delay(2000).ContinueWith(_ => {
+                    if (!IsMissionActive && !hasCompletedMission)
+                    {
+                        StartMission("house1");
+                    }
+                });
+            }
+
+            lastWantedLevel = currentWantedLevel;
+        }
+
         public void Update()
         {
-            if (!IsMissionActive) return;
+            if (!IsMissionActive)
+            {
+                CheckForAutoRetry();
+                return;
+            }
 
             empGrenade.Update();
 
@@ -617,6 +659,9 @@ namespace HouseRobbery.Client
             SetPlayerWantedLevel(PlayerId(), 1, false);
             SetPlayerWantedLevelNow(PlayerId(), false);
 
+            waitingForWantedLevelClear = true;
+            lastWantedLevel = GetPlayerWantedLevel(PlayerId());
+
             // Wait a moment then cleanup
             await BaseScript.Delay(2000);
 
@@ -717,6 +762,8 @@ namespace HouseRobbery.Client
             if (CurrentState == MissionState.Completed) return;
 
             CurrentState = MissionState.Completed;
+            hasCompletedMission = true;
+            waitingForWantedLevelClear = false;
             OnMissionStateChanged?.Invoke(CurrentState);
 
             // Success message with bonus for collecting everything
@@ -760,9 +807,37 @@ namespace HouseRobbery.Client
             {
                 // Player caught outside - start alarm but give them a chance
                 Screen.ShowNotification("~r~ALARM TRIGGERED! Security is on high alert!");
-                StartExteriorAlarm();
-                FailMission();
+                //StartExteriorAlarm();
+                FailMissionFromCamera();
             }
+        }
+
+        private async void FailMissionFromCamera()
+        {
+            if (CurrentState == MissionState.Failed) return;
+
+            CurrentState = MissionState.Failed;
+            OnMissionStateChanged?.Invoke(CurrentState);
+
+            // Start exterior alarm
+            StartExteriorAlarm();
+
+            // Give player 3-star wanted level like lockpicking failure
+            SetPlayerWantedLevel(PlayerId(), 3, false);
+            SetPlayerWantedLevelNow(PlayerId(), false);
+
+            waitingForWantedLevelClear = true;
+            lastWantedLevel = GetPlayerWantedLevel(PlayerId());
+
+            // Show fail messages
+            Screen.ShowNotification("~r~Thieves Guild: You've been spotted on camera!");
+            Screen.ShowNotification("~r~Police are on their way - mission failed!");
+
+            // Wait a moment then cleanup (no teleportation, no police spawning)
+            await BaseScript.Delay(2000);
+
+            CleanupMission();
+            OnMissionFailed?.Invoke();
         }
 
         private bool IsPlayerInsideHouse(Vector3 playerPos)
@@ -780,7 +855,7 @@ namespace HouseRobbery.Client
             {
                 StartAlarm("JEWEL_STORE_HEIST_ALARMS", true);
 
-                PlaySoundFrontend(-1, "Beep_Green", "DLC_HEIST_HACKING_SNAKE_SOUNDS", true);
+                PlaySoundFrontend(-1, "Out_Of_Bounds_Timer", "DLC_HEISTS_GENERAL_FRONTEND_SOUNDS", true);
 
                 Debug.WriteLine("[ALARM] Exterior alarm started successfully");
             }
@@ -825,6 +900,9 @@ namespace HouseRobbery.Client
 
             // Spawn police and set wanted level
             SpawnPoliceResponse();
+
+            waitingForWantedLevelClear = true;
+            lastWantedLevel = GetPlayerWantedLevel(PlayerId());
 
             // Clear player loot immediately
             lootManager.UnloadLoot();

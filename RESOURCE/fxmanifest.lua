@@ -2,7 +2,7 @@ fx_version 'cerulean'
 game 'gta5'
 
 author 'The Thieves Guild'
-description 'House Robbery'
+description 'House Robbery by Connor and Zoey'
 version '1.0.0'
 
 client_script 'HouseRobbery.Client.net.dll'

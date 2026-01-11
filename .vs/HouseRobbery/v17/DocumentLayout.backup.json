@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\young\\Desktop\\HouseRobbery\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{9CF3C769-BBC0-4033-9FA5-2772BA288110}|Client\\HouseRobbery.Client.csproj|c:\\users\\young\\desktop\\houserobbery\\client\\missionbuilder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{9CF3C769-BBC0-4033-9FA5-2772BA288110}|Client\\HouseRobbery.Client.csproj|solutionrelative:client\\missionbuilder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{9CF3C769-BBC0-4033-9FA5-2772BA288110}|Client\\HouseRobbery.Client.csproj|c:\\users\\young\\desktop\\houserobbery\\client\\missionmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{9CF3C769-BBC0-4033-9FA5-2772BA288110}|Client\\HouseRobbery.Client.csproj|solutionrelative:client\\missionmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9CF3C769-BBC0-4033-9FA5-2772BA288110}|Client\\HouseRobbery.Client.csproj|c:\\users\\young\\desktop\\houserobbery\\client\\missionbuilder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9CF3C769-BBC0-4033-9FA5-2772BA288110}|Client\\HouseRobbery.Client.csproj|solutionrelative:client\\missionbuilder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{9CF3C769-BBC0-4033-9FA5-2772BA288110}|Client\\HouseRobbery.Client.csproj|c:\\users\\young\\desktop\\houserobbery\\client\\missiondata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -73,7 +73,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
@@ -85,12 +85,11 @@
               "RelativeToolTip": "Client\\EMPGrenade.cs",
               "ViewState": "AgIAAKkBAAAAAAAAAAAkwLgBAAA+AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-09T04:58:25.524Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-09T04:58:25.524Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "MissionBuilder.cs",
               "DocumentMoniker": "C:\\Users\\young\\Desktop\\HouseRobbery\\Client\\MissionBuilder.cs",
               "RelativeDocumentMoniker": "Client\\MissionBuilder.cs",
@@ -98,8 +97,7 @@
               "RelativeToolTip": "Client\\MissionBuilder.cs",
               "ViewState": "AgIAAKMAAAAAAAAAAAASwMoAAACjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-06T03:15:31.218Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-06T03:15:31.218Z"
             },
             {
               "$type": "Document",
@@ -111,18 +109,17 @@
               "RelativeToolTip": "Client\\MissionData.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-06T03:15:09.996Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-06T03:15:09.996Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "MissionManager.cs",
               "DocumentMoniker": "C:\\Users\\young\\Desktop\\HouseRobbery\\Client\\MissionManager.cs",
               "RelativeDocumentMoniker": "Client\\MissionManager.cs",
               "ToolTip": "C:\\Users\\young\\Desktop\\HouseRobbery\\Client\\MissionManager.cs",
               "RelativeToolTip": "Client\\MissionManager.cs",
-              "ViewState": "AgIAAOkDAAAAAAAAAAApwAQEAABHAAAAAAAAAA==",
+              "ViewState": "AgIAAD0DAAAAAAAAAAASwFkDAAA+AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-01-04T16:32:30.389Z",
               "EditorCaption": ""
@@ -137,8 +134,7 @@
               "RelativeToolTip": "Client\\CameraManager.cs",
               "ViewState": "AgIAAMgAAAAAAAAAAADwv+MAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-03T20:15:35.131Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-03T20:15:35.131Z"
             },
             {
               "$type": "Document",
@@ -150,8 +146,7 @@
               "RelativeToolTip": "Client\\Camera.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAMUAAABNAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-03T20:15:10.668Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-03T20:15:10.668Z"
             },
             {
               "$type": "Document",
@@ -163,8 +158,7 @@
               "RelativeToolTip": "Client\\LootManager.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAABIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-23T15:17:44.366Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-23T15:17:44.366Z"
             },
             {
               "$type": "Document",
@@ -176,8 +170,7 @@
               "RelativeToolTip": "Client\\LootItem.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-23T15:17:17.545Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-23T15:17:17.545Z"
             },
             {
               "$type": "Document",
@@ -201,8 +194,7 @@
               "RelativeToolTip": "Shared\\Dummy.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-08T22:35:17.53Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-08T22:35:17.53Z"
             },
             {
               "$type": "Document",
@@ -262,8 +254,7 @@
               "RelativeToolTip": "Client\\Lockpicking.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAIMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-08T01:37:46.916Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-08T01:37:46.916Z"
             },
             {
               "$type": "Document",
@@ -275,8 +266,7 @@
               "RelativeToolTip": "Client\\ClientMain.cs",
               "ViewState": "AgIAAN4BAAAAAAAAAIAwwAUCAABHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-06T22:37:17.926Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-06T22:37:17.926Z"
             }
           ]
         }
