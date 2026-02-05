@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using CitizenFX.Core;
@@ -29,6 +29,15 @@ namespace HouseRobbery.Client
         private bool hasStartedIntro = false;
         private bool phoneCreated = false;
 
+        // BANK ROBBERY
+
+        private HostageSystem hostageSystem = new HostageSystem();
+        private BankRobberyManager bankRobberyManager;
+        private GuardSystem guardSystem = new GuardSystem();
+
+        private bool missionMenuEnabled = false;
+
+
         private void OnAlarmTriggered()
         {
             // Handle alarm trigger - kick player out, spawn cops, etc.
@@ -47,6 +56,8 @@ namespace HouseRobbery.Client
             missionManager.OnMissionCompleted += (value) => Debug.WriteLine($"Mission completed with ${value}");
             missionManager.OnMissionFailed += () => Debug.WriteLine("Mission failed!");
 
+            bankRobberyManager = new BankRobberyManager(lootManager, cameraManager, lockpickingInstance);
+
 
             RegisterNuiCallbackType("lockpickingInput");
             EventHandlers["__cfx_nui:lockpickingInput"] += new Action<IDictionary<string, object>, CallbackDelegate>((data, cb) =>
@@ -59,9 +70,26 @@ namespace HouseRobbery.Client
                 cb(new { ok = true });
             });
 
+            RegisterNuiCallbackType("MissionSelect");
+            EventHandlers["__cfx_nui:MissionSelect"] += new Action<IDictionary<string, object>, CallbackDelegate>((data, cb) =>
+            {
+                if (data.TryGetValue("action", out var actionObj))
+                {
+                    var action = actionObj as string;
+                    HandleMissionMenuCallback(action);
+                }
+                cb(new { ok = true });
+            });
+
             EventHandlers["explosionEvent"] += new Action<int, float, float, float, bool, uint, float>(OnExplosion);
 
-            StartIntroSequence();
+            SetNuiFocus(false, false);
+
+            // HOUSE ROBBERY MISSION
+            //StartIntroSequence();
+
+            // BANK ROBBERY
+
         }
 
         [Command("getcoords")]
@@ -262,6 +290,13 @@ namespace HouseRobbery.Client
             var playerPed = PlayerPedId();
             var playerPos = GetEntityCoords(playerPed, true);
 
+            // BANK ROBBERY
+            hostageSystem.Update();
+            bankRobberyManager.Update();
+            guardSystem.Update();
+
+            // HOUSE ROBBERY
+
             // Show coordinates on screen if enabled
             if (showCoords)
             {
@@ -282,31 +317,17 @@ namespace HouseRobbery.Client
 
             nearHouse = false;
 
-            // Check proximity to houses
-            foreach (var house in houseLocations)
+            HandleMissionMenuInput();
+
+            // Mission Menu Input Blocking (like cl_action.lua)
+            if (missionMenuEnabled)
             {
-                var distance = GetDistanceBetweenCoords(playerPos.X, playerPos.Y, playerPos.Z,
-                    house.X, house.Y, house.Z, true);
-
-                if (distance < 2.0f)
-                {
-                    nearHouse = true;
-                    currentHousePos = house;
-
-                    // Draw marker
-                    DrawMarker(1, house.X, house.Y, house.Z - 1.0f, 0, 0, 0, 0, 0, 0,
-                        1.0f, 1.0f, 1.0f, 255, 0, 0, 100, false, true, 2, false, null, null, false);
-
-                    // Show interaction prompt
-                    Screen.DisplayHelpTextThisFrame("Press ~INPUT_CONTEXT~ to attempt robbery");
-
-                    // Handle input
-                    if (IsControlJustPressed(0, 51)) // E key
-                    {
-                        await StartRobberyAttempt();
-                    }
-                    break;
-                }
+                DisableControlAction(0, 1, true);   // LookLeftRight
+                DisableControlAction(0, 2, true);   // LookUpDown  
+                DisableControlAction(0, 24, true);  // Attack
+                DisablePlayerFiring(playerPed, true); // Disable weapon firing
+                DisableControlAction(0, 142, true); // MeleeAttackAlternate
+                DisableControlAction(0, 106, true); // VehicleMouseControlOverride
             }
 
             // Check for loot pickup and draw markers
@@ -528,5 +549,261 @@ namespace HouseRobbery.Client
             NetworkOverrideClockTime(23, 0, 0);
             Screen.ShowNotification("~b~Time set to night (23:00).");
         }
+
+
+        // BANK ROBBERY
+
+        //ActionMenu
+        private void ToggleMissionMenu()
+        {
+            // Toggle menu state (like ToggleActionMenu in Lua)
+            missionMenuEnabled = !missionMenuEnabled;
+
+            if (missionMenuEnabled)
+            {
+                // Focus NUI with mouse cursor enabled
+                SetNuiFocus(true, true);
+
+                // Send message to JavaScript to show menu (as JSON string)
+                SendNuiMessage(@"{
+            ""showmenu"": true,
+            ""menuType"": ""mission_selection"",
+            ""missions"": [
+                {
+                    ""id"": ""bank_loud"",
+                    ""name"": ""Bank Robbery - Loud"",
+                    ""description"": ""High risk, high reward approach""
+                },
+                {
+                    ""id"": ""bank_quiet"",
+                    ""name"": ""Bank Robbery - Stealth"",
+                    ""description"": ""Silent but deadly approach""
+                },
+                {
+                    ""id"": ""house"",
+                    ""name"": ""House Robbery"",
+                    ""description"": ""Practice mission for beginners""
+                }
+            ]
+        }");
+
+                Debug.WriteLine("[MISSION_MENU] Mission menu opened");
+            }
+            else
+            {
+                // Remove NUI focus
+                SetNuiFocus(false, false);
+
+                // Send message to JavaScript to hide menu (as JSON string)
+                SendNuiMessage(@"{
+            ""hidemenu"": true
+        }");
+
+                Debug.WriteLine("[MISSION_MENU] Mission menu closed");
+            }
+        }
+
+        private void HandleMissionMenuInput()
+        {
+            // Check Z key pressed (Control 20 like cl_action.lua) to open menu
+            if (IsControlJustPressed(1, 20)) // Z key
+            {
+                ToggleMissionMenu();
+            }
+        }
+
+        private void HandleMissionMenuCallback(string action)
+        {
+            Debug.WriteLine($"[MISSION_MENU] Received action: {action}");
+
+            switch (action)
+            {
+                case "bank_loud":
+                    Screen.ShowNotification("~r~Starting LOUD bank robbery approach!");
+                    bankRobberyManager.StartBankRobbery("loud");
+                    break;
+
+                case "bank_quiet":
+                    Screen.ShowNotification("~b~Starting STEALTH bank robbery approach!");
+                    bankRobberyManager.StartBankRobbery("quiet");
+                    break;
+
+                case "house":
+                    Screen.ShowNotification("~y~Starting house robbery!");
+                    missionManager.StartMission("house1");
+                    break;
+
+                case "exit":
+                    // Close menu and return (like cl_action.lua exit handling)
+                    ToggleMissionMenu();
+                    return;
+            }
+
+            // Close menu after selection (unless it was exit)
+            ToggleMissionMenu();
+        }
+
+        [Command("testhostages")]
+        public void TestHostages(int source, List<object> args, string raw)
+        {
+            var playerPed = PlayerPedId();
+            var playerPos = GetEntityCoords(playerPed, true);
+
+            // Set crew standby position 15 units to the right of player
+            Vector3 crewStandByPosition = playerPos + new Vector3(15.0f, 0f, 0f);
+
+            Screen.ShowNotification("~y~Initializing hostage system...");
+            Debug.WriteLine($"[TEST] Starting hostage system at player position: {playerPos}");
+
+            hostageSystem.Initialize(crewStandByPosition);
+        }
+
+        [Command("cleanhostages")]
+        public void CleanHostages(int source, List<object> args, string raw)
+        {
+            hostageSystem.Cleanup();
+            Screen.ShowNotification("~r~Hostage system cleaned up.");
+        }
+
+        [Command("givepistol")]
+        public void GivePistol(int source, List<object> args, string raw)
+        {
+            var playerPed = PlayerPedId();
+
+            // Give pistol with ammo
+            uint pistolHash = (uint)GetHashKey("weapon_pistol");
+            GiveWeaponToPed(playerPed, pistolHash, 250, false, true);
+
+            Screen.ShowNotification("~g~Pistol equipped with 250 rounds!");
+            Debug.WriteLine("[WEAPON] Player given pistol with 250 rounds");
+        }
+
+        [Command("startbank")]
+        public void StartBankRobbery(int source, List<object> args, string raw)
+        {
+            string approach = args.Count > 0 ? args[0].ToString() : "loud";
+            bankRobberyManager.StartBankRobbery(approach);
+        }
+
+        [Command("placeguard")]
+        public void PlaceGuard(int source, List<object> args, string raw)
+        {
+            var playerPed = PlayerPedId();
+            var playerPos = GetEntityCoords(playerPed, true);
+
+            guardSystem.AddGuard(playerPos);
+            Screen.ShowNotification("~y~Guard placed at your location");
+        }
+
+        [Command("cleanbank")]
+        public void CleanBank(int source, List<object> args, string raw)
+        {
+            bankRobberyManager.FailRobbery();
+            guardSystem.Cleanup();
+            hostageSystem.Cleanup();
+        }
+
+        [Command("tpbank")]
+        public void TeleportToBank(int source, List<object> args, string raw)
+        {
+            var playerPed = PlayerPedId();
+
+            // Bank exterior coordinates (from BankRobberyManager)
+            Vector3 bankExterior = new Vector3(226.4f, 211.6f, 105.5f);
+
+            // Get ground Z coordinate for safety
+            float groundZ = bankExterior.Z;
+            GetGroundZFor_3dCoord(bankExterior.X, bankExterior.Y, bankExterior.Z + 10f, ref groundZ, false);
+            Vector3 safePos = new Vector3(bankExterior.X, bankExterior.Y, groundZ + 1f);
+
+            // Teleport player
+            SetEntityCoords(playerPed, safePos.X, safePos.Y, safePos.Z, false, false, false, true);
+            SetEntityHeading(playerPed, 0f);
+
+            Screen.ShowNotification("~g~Teleported to Union Depository exterior");
+            Debug.WriteLine($"[TELEPORT] Player teleported to bank exterior: {safePos}");
+        }
+
+        [Command("testguards")]
+        public void TestGuards(int source, List<object> args, string raw)
+        {
+            guardSystem.Initialize();
+
+            var playerPos = GetEntityCoords(PlayerPedId(), true);
+
+            // Create a test patrol
+            var testPatrol = new List<PatrolNode>
+    {
+        new PatrolNode(playerPos + new Vector3(5f, 0f, 0f), 0f, 3f),
+        new PatrolNode(playerPos + new Vector3(0f, 5f, 0f), 90f, 4f, true),
+        new PatrolNode(playerPos + new Vector3(-5f, 0f, 0f), 180f, 3f),
+        new PatrolNode(playerPos + new Vector3(0f, -5f, 0f), 270f, 4f)
+    };
+
+            guardSystem.AddGuard(playerPos, testPatrol);
+            Screen.ShowNotification("~g~Test guard with patrol path spawned!");
+        }
+
+        [Command("forceopendoor")]
+        public void ForceOpenDoor(int source, List<object> args, string raw)
+        {
+            uint vaultHash = 961976194;
+
+            try
+            {
+                // Use state 5 = DOORSTATE_FORCE_OPEN_THIS_FRAME
+                DoorSystemSetDoorState(vaultHash, 5, true, true);
+                Screen.ShowNotification("~g~Forced door open with state 5!");
+                Debug.WriteLine("[VAULT] Forced door open with DOORSTATE_FORCE_OPEN_THIS_FRAME");
+            }
+            catch (Exception ex)
+            {
+                Screen.ShowNotification($"~r~Failed: {ex.Message}");
+                Debug.WriteLine($"[VAULT] Force open failed: {ex.Message}");
+            }
+        }
+
+        [Command("unlockdoor")]
+        public void UnlockDoor(int source, List<object> args, string raw)
+        {
+            uint vaultHash = 961976194;
+
+            try
+            {
+                // Unlock the door (state 0)
+                DoorSystemSetDoorState(vaultHash, 0, true, true);
+                Screen.ShowNotification("~y~Door unlocked!");
+
+                // Then set open ratio
+                BaseScript.Delay(100).ContinueWith(_ => {
+                    try
+                    {
+                        DoorSystemSetOpenRatio(vaultHash, 1.0f, true, true);
+                        Screen.ShowNotification("~g~Door opened!");
+                        Debug.WriteLine("[VAULT] Door unlocked and opened");
+                    }
+                    catch (Exception ex2)
+                    {
+                        Debug.WriteLine($"[VAULT] Open ratio failed: {ex2.Message}");
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Screen.ShowNotification($"~r~Unlock failed: {ex.Message}");
+                Debug.WriteLine($"[VAULT] Unlock failed: {ex.Message}");
+            }
+        }
+
+        [Command("missionmenu")]
+        public void OpenMissionMenu(int source, List<object> args, string raw)
+        {
+            if (!missionMenuEnabled)
+            {
+                ToggleMissionMenu();
+            }
+        }
+
+
     }
 }
