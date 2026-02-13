@@ -319,7 +319,7 @@ namespace HouseRobbery.Client
 
             HandleMissionMenuInput();
 
-            // Mission Menu Input Blocking (like cl_action.lua)
+            // Mission Menu Input Blocking 
             if (missionMenuEnabled)
             {
                 DisableControlAction(0, 1, true);   // LookLeftRight
@@ -556,7 +556,7 @@ namespace HouseRobbery.Client
         //ActionMenu
         private void ToggleMissionMenu()
         {
-            // Toggle menu state (like ToggleActionMenu in Lua)
+            // Toggle menu state 
             missionMenuEnabled = !missionMenuEnabled;
 
             if (missionMenuEnabled)
@@ -564,7 +564,7 @@ namespace HouseRobbery.Client
                 // Focus NUI with mouse cursor enabled
                 SetNuiFocus(true, true);
 
-                // Send message to JavaScript to show menu (as JSON string)
+                // Send message to JavaScript to show menu 
                 SendNuiMessage(@"{
             ""showmenu"": true,
             ""menuType"": ""mission_selection"",
@@ -594,7 +594,7 @@ namespace HouseRobbery.Client
                 // Remove NUI focus
                 SetNuiFocus(false, false);
 
-                // Send message to JavaScript to hide menu (as JSON string)
+                // Send message to JavaScript to hide menu
                 SendNuiMessage(@"{
             ""hidemenu"": true
         }");
@@ -605,7 +605,6 @@ namespace HouseRobbery.Client
 
         private void HandleMissionMenuInput()
         {
-            // Check Z key pressed (Control 20 like cl_action.lua) to open menu
             if (IsControlJustPressed(1, 20)) // Z key
             {
                 ToggleMissionMenu();
@@ -634,14 +633,112 @@ namespace HouseRobbery.Client
                     break;
 
                 case "exit":
-                    // Close menu and return (like cl_action.lua exit handling)
                     ToggleMissionMenu();
                     return;
             }
 
-            // Close menu after selection (unless it was exit)
             ToggleMissionMenu();
         }
+
+        [Command("listdoors")]
+        public void ListBankDoors(int source, List<object> args, string raw)
+        {
+            var gateSystem = bankRobberyManager.GetBankGateSystem(); 
+            gateSystem.DebugListAllDoors();
+            Screen.ShowNotification("~y~Bank doors listed in F8 console");
+        }
+
+        [Command("testgates")]
+        public void TestGates(int source, List<object> args, string raw)
+        {
+            var gateSystem = bankRobberyManager.GetBankGateSystem();
+
+            Debug.WriteLine("[DEBUG] Testing gate system...");
+            gateSystem.Initialize();
+
+            Screen.ShowNotification("~y~Testing gate system - check F8 console");
+        }
+
+        [Command("lockgates")]
+        public void LockGates(int source, List<object> args, string raw)
+        {
+            var gateSystem = bankRobberyManager.GetBankGateSystem();
+            gateSystem.ForceLockGates();
+            Screen.ShowNotification("~r~Gates force locked");
+        }
+
+        [Command("unlockgate1")]
+        public void UnlockGate1Debug(int source, List<object> args, string raw)
+        {
+            var gateSystem = bankRobberyManager.GetBankGateSystem();
+            gateSystem.UnlockGate1();
+            Screen.ShowNotification("~g~Debug: Unlocking Gate 1");
+        }
+
+        [Command("unlockgate2")]
+        public void UnlockGate2Debug(int source, List<object> args, string raw)
+        {
+            var gateSystem = bankRobberyManager.GetBankGateSystem();
+            gateSystem.UnlockGate2();
+            Screen.ShowNotification("~g~Debug: Unlocking Gate 2");
+        }
+
+        [Command("unlockgates")]
+        public void UnlockGatesDebug(int source, List<object> args, string raw)
+        {
+            var gateSystem = bankRobberyManager.GetBankGateSystem();
+            gateSystem.UnlockGates();
+            Screen.ShowNotification("~g~Debug: Unlocking all gates");
+        }
+
+        [Command("forcemanager")]
+        public void ForceManagerUnlock(int source, List<object> args, string raw)
+        {
+            var managerSystem = bankRobberyManager.GetBankManagerSystem();
+            managerSystem.ForceUnlockGates();
+            Screen.ShowNotification("~y~Debug: Forcing manager to unlock gates");
+        }
+
+        [Command("checkdoor")]
+        public void CheckDoorNearPlayer(int source, List<object> args, string raw)
+        {
+            var playerPos = GetEntityCoords(PlayerPedId(), true);
+
+            uint[] testHashes = {
+        110411286,   // Main door hash from your data
+        1956494919,  // Interior door hash
+        964838196    // Office door hash
+    };
+
+            foreach (uint hash in testHashes)
+            {
+                int doorObj = GetClosestObjectOfType(playerPos.X, playerPos.Y, playerPos.Z, 15f, hash, false, false, false);
+                if (DoesEntityExist(doorObj))
+                {
+                    var objPos = GetEntityCoords(doorObj, true);
+                    float distance = Vector3.Distance(playerPos, objPos);
+                    Debug.WriteLine($"[DOOR_CHECK] Found door: Hash {hash}, Object {doorObj}, Distance {distance:F1}m");
+
+                    // Test door control
+                    try
+                    {
+                        SetStateOfClosestDoorOfType(hash, objPos.X, objPos.Y, objPos.Z, true, 0.0f, false);
+                        Debug.WriteLine($"[DOOR_CHECK] Successfully sent lock command to hash {hash}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"[DOOR_CHECK] Failed to control hash {hash}: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine($"[DOOR_CHECK] No door found for hash {hash}");
+                }
+            }
+
+            Screen.ShowNotification("~y~Door check complete - see F8 console");
+        }
+
 
         [Command("testhostages")]
         public void TestHostages(int source, List<object> args, string raw)
@@ -649,7 +746,6 @@ namespace HouseRobbery.Client
             var playerPed = PlayerPedId();
             var playerPos = GetEntityCoords(playerPed, true);
 
-            // Set crew standby position 15 units to the right of player
             Vector3 crewStandByPosition = playerPos + new Vector3(15.0f, 0f, 0f);
 
             Screen.ShowNotification("~y~Initializing hostage system...");
@@ -708,7 +804,7 @@ namespace HouseRobbery.Client
         {
             var playerPed = PlayerPedId();
 
-            // Bank exterior coordinates (from BankRobberyManager)
+            // Bank exterior coordinates
             Vector3 bankExterior = new Vector3(226.4f, 211.6f, 105.5f);
 
             // Get ground Z coordinate for safety
@@ -802,6 +898,17 @@ namespace HouseRobbery.Client
             {
                 ToggleMissionMenu();
             }
+        }
+
+        [Command("clearwanted")]
+        public void ClearWantedLevel(int source, List<object> args, string raw)
+        {
+            // Clear wanted level completely
+            SetPlayerWantedLevel(PlayerId(), 0, false);
+            SetPlayerWantedLevelNow(PlayerId(), false);
+
+            Screen.ShowNotification("~g~Wanted level cleared!");
+            Debug.WriteLine("[DEBUG] Player wanted level cleared");
         }
 
 

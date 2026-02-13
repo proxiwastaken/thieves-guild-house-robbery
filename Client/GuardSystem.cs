@@ -110,14 +110,14 @@ namespace HouseRobbery.Client
                     }
                     else
                     {
-                        // Default single node patrol (just stand and look around)
+                        // just stand and look around)
                         guard.PatrolPath.Add(new PatrolNode(position, GetEntityHeading(ped), 5f, true));
                         TaskStandStill(ped, -1);
                     }
 
                     guards.Add(guard);
                     Debug.WriteLine($"[GUARD] Spawned guard {ped} at {position}");
-                    Screen.ShowNotification($"~r~Guard spawned at {position.X:F1}, {position.Y:F1}");
+                    //Screen.ShowNotification($"~r~Guard spawned at {position.X:F1}, {position.Y:F1}");
                 }
                 else
                 {
@@ -220,7 +220,7 @@ namespace HouseRobbery.Client
                     }
                     else
                     {
-                        Screen.ShowNotification("~r~Get closer for a stealth takedown!");
+                        //Screen.ShowNotification("~r~Get closer for a stealth takedown!");
                     }
                 }
             }
@@ -393,7 +393,7 @@ namespace HouseRobbery.Client
             SetPedAsEnemy(guard.PedId, true);
             TaskCombatPed(guard.PedId, playerPed, 0, 16);
 
-            Screen.ShowNotification("~r~GUARD ALERTED! All guards now hostile!");
+            //Screen.ShowNotification("~r~GUARD ALERTED! All guards now hostile!");
             Debug.WriteLine($"[GUARD] Guard {guard.PedId} alerted!");
 
             // Alert all other guards

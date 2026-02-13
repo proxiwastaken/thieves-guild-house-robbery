@@ -16,11 +16,11 @@ namespace HouseRobbery.Client
 
     public class VaultDoorSystem
     {
-        // Union Depository vault door hash and terminal position (from Lua)
+        // vault door
         private uint vaultDoorHash = 961976194; // v_ilev_bk_vaultdoor
-        private Vector3 terminalPosition = new Vector3(253.3081f, 228.4226f, 101.6833f); // From Lua
+        private Vector3 terminalPosition = new Vector3(253.3081f, 228.4226f, 101.6833f);
 
-        // Door heading values (from Lua)
+        // Door heading values
         private const float DOOR_CLOSED_HEADING = 160.0f;
         private const float DOOR_OPEN_HEADING = 0.0f;
         private const float DOOR_SPEED = 1.0f; // Rotation speed
@@ -39,33 +39,42 @@ namespace HouseRobbery.Client
 
         public void Initialize()
         {
-            FindVaultDoor();
+            isHacking = false;
+            hackingProgress = 0f;
+            IsUnlocked = false;
             State = VaultDoorState.Closed;
-            Debug.WriteLine("[VAULT] Vault door system initialized using Lua method");
+            vaultDoorObject = 0;
+
+            FindVaultDoor();
         }
 
-        private void FindVaultDoor()
+        private async void FindVaultDoor()
         {
             var playerPos = GetEntityCoords(PlayerPedId(), true);
 
-            // Find the vault door object (from Lua method)
-            vaultDoorObject = GetClosestObjectOfType(playerPos.X, playerPos.Y, playerPos.Z, 100.0f, vaultDoorHash, false, false, false);
+            // Find the vault door object
+            vaultDoorObject = GetClosestObjectOfType(playerPos.X, playerPos.Y, playerPos.Z, 50.0f, vaultDoorHash, false, false, false);
 
             if (vaultDoorObject != 0 && DoesEntityExist(vaultDoorObject))
             {
-                // Freeze the door to prevent game interference (from Lua)
+                // secure the door
+                SetEntityHeading(vaultDoorObject, DOOR_CLOSED_HEADING);
                 FreezeEntityPosition(vaultDoorObject, true);
 
-                // Set to closed position
+                // Wait a frame then double-check
+                await BaseScript.Delay(50);
                 SetEntityHeading(vaultDoorObject, DOOR_CLOSED_HEADING);
 
-                Debug.WriteLine($"[VAULT] Found vault door object: {vaultDoorObject}");
-                Screen.ShowNotification("~g~Vault door located and secured!");
+                // Make sure no other scripts can interfere
+                SetEntityCollision(vaultDoorObject, true, true);
+
+                Debug.WriteLine($"[VAULT] Vault door {vaultDoorObject} SECURED at heading {GetEntityHeading(vaultDoorObject):F1}°");
+                //Screen.ShowNotification("~g~Vault door located and secured!");
             }
             else
             {
-                Debug.WriteLine("[VAULT] Failed to find vault door object");
-                Screen.ShowNotification("~r~Could not locate vault door!");
+                Debug.WriteLine($"[VAULT] No vault door found near player at {playerPos} (search radius: 50m)");
+                // Don't show error notification here - it will try again
             }
         }
 
@@ -77,7 +86,7 @@ namespace HouseRobbery.Client
                 return;
             }
 
-            // Check if player is at terminal (from Lua)
+            // Check if player is at terminal
             var playerPos = GetEntityCoords(PlayerPedId(), true);
             float distanceToTerminal = GetDistanceBetweenCoords(playerPos.X, playerPos.Y, playerPos.Z,
                 terminalPosition.X, terminalPosition.Y, terminalPosition.Z, true);
@@ -138,12 +147,14 @@ namespace HouseRobbery.Client
             hackingProgress = 1f;
             IsUnlocked = true;
 
-            Screen.ShowNotification("~g~Vault terminal hacked! You can now control the door!");
-            Debug.WriteLine("[VAULT] Vault terminal hack completed successfully");
-
-            // Don't auto-open, let player control it manually like in Lua
-            State = VaultDoorState.Closed; // Still closed but now unlocked
+            State = VaultDoorState.Closed; // Door is closed but now unlocked
             OnStateChanged?.Invoke(State);
+
+            Screen.ShowNotification("~g~Vault terminal hacked! You can now control the door!");
+            Screen.ShowNotification("~y~Use LEFT/RIGHT arrow keys to open/close the vault!");
+            Debug.WriteLine("[VAULT] Vault terminal hack completed - door is now controllable");
+
+            OnDoorOpened?.Invoke();
         }
 
         private void FailHacking()
@@ -170,16 +181,30 @@ namespace HouseRobbery.Client
                 return;
             }
 
-            // Only allow door control if unlocked (like Lua)
-            if (!IsUnlocked || vaultDoorObject == 0 || !DoesEntityExist(vaultDoorObject))
+            // If we don't have a door object yet, try to find it when player is near the bank
+            if (vaultDoorObject == 0 || !DoesEntityExist(vaultDoorObject))
+            {
+                var playerPos = GetEntityCoords(PlayerPedId(), true);
+                var bankPos = new Vector3(255.2f, 223.2f, 102.3f); 
+                float distanceToBank = Vector3.Distance(playerPos, bankPos);
+
+                if (distanceToBank < 30f)
+                {
+                    FindVaultDoor();
+                }
+                return;
+            }
+
+            // Only allow door control if unlocked
+            if (!IsUnlocked)
                 return;
 
-            // Check if player is near terminal (from Lua)
-            var playerPos = GetEntityCoords(PlayerPedId(), true);
-            float distanceToTerminal = GetDistanceBetweenCoords(playerPos.X, playerPos.Y, playerPos.Z,
+            // Check if player is near terminal
+            var currentPlayerPos = GetEntityCoords(PlayerPedId(), true);
+            float distanceToTerminal = GetDistanceBetweenCoords(currentPlayerPos.X, currentPlayerPos.Y, currentPlayerPos.Z,
                 terminalPosition.X, terminalPosition.Y, terminalPosition.Z, true);
 
-            if (distanceToTerminal <= 1.5f)
+            if (distanceToTerminal <= 2.0f)
             {
                 HandleDoorControls();
             }
@@ -189,18 +214,17 @@ namespace HouseRobbery.Client
         {
             if (vaultDoorObject == 0 || !DoesEntityExist(vaultDoorObject)) return;
 
-            // Get current door heading (from Lua)
+            // Get current door heading 
             float currentHeading = GetEntityHeading(vaultDoorObject);
             float roundedHeading = (float)Math.Round(currentHeading, 1);
 
-            // Adjust for Lua's specific heading fix
             if (roundedHeading == 158.7f)
             {
                 currentHeading = currentHeading - 0.1f;
                 roundedHeading = (float)Math.Round(currentHeading, 1);
             }
 
-            // Show appropriate help text (from Lua)
+            // Show appropriate help text
             if (roundedHeading != 0.0f && roundedHeading != 160.0f)
             {
                 Screen.DisplayHelpTextThisFrame("Hold ~INPUT_CELLPHONE_LEFT~ to Open Vault~n~Hold ~INPUT_CELLPHONE_RIGHT~ to Close Vault");
@@ -214,7 +238,7 @@ namespace HouseRobbery.Client
                 Screen.DisplayHelpTextThisFrame("Hold ~INPUT_CELLPHONE_LEFT~ to Open Vault");
             }
 
-            // Handle opening (Left arrow key - Control 174)
+            // Handle opening (Left arrow key)
             if (IsControlPressed(1, 174) && roundedHeading != 0.0f) // Open
             {
                 float newHeading = Math.Max(0.0f, currentHeading - DOOR_SPEED);
@@ -235,7 +259,7 @@ namespace HouseRobbery.Client
                 }
             }
 
-            // Handle closing (Right arrow key - Control 175)
+            // Handle closing (Right arrow key)
             if (IsControlPressed(1, 175) && roundedHeading != 160.0f) // Close
             {
                 float newHeading = Math.Min(160.0f, currentHeading + DOOR_SPEED);
@@ -254,31 +278,30 @@ namespace HouseRobbery.Client
         {
             if (!isHacking) return;
 
-            // Draw progress bar
-            float screenWidth = 1920f;
-            float screenHeight = 1080f;
-            float barWidth = 400f;
-            float barHeight = 30f;
-            float barX = (screenWidth - barWidth) / 2f;
-            float barY = screenHeight * 0.8f;
+            float barWidth = 0.25f;      // Use normalized screen coordinates (0.0 to 1.0)
+            float barHeight = 0.025f;    // Use normalized coordinates
+            float barX = 0.5f;           // Center X (50% of screen width)
+            float barY = 0.8f;           // 80% down from top
 
             // Background
-            DrawRect(barX / screenWidth, barY / screenHeight, barWidth / screenWidth, barHeight / screenHeight, 0, 0, 0, 150);
+            DrawRect(barX, barY, barWidth, barHeight, 0, 0, 0, 150);
 
             // Progress
             float progressWidth = barWidth * hackingProgress;
-            DrawRect(barX / screenWidth, barY / screenHeight, progressWidth / screenWidth, barHeight / screenHeight, 0, 255, 0, 200);
+            float progressX = barX - (barWidth - progressWidth) / 2; 
+            DrawRect(progressX, barY, progressWidth, barHeight, 0, 255, 0, 200);
 
-            // Text
+            //Text positioning
             SetTextFont(0);
             SetTextProportional(true);
             SetTextScale(0.0f, 0.6f);
             SetTextColour(255, 255, 255, 255);
             SetTextDropShadow();
             SetTextOutline();
+            SetTextCentre(true); 
             SetTextEntry("STRING");
             AddTextComponentString($"HACKING TERMINAL... {(int)(hackingProgress * 100)}%");
-            DrawText((barX + 20f) / screenWidth, (barY - 10f) / screenHeight);
+            DrawText(barX, barY - 0.04f);
         }
 
         public void Cleanup()
