@@ -274,9 +274,9 @@ namespace HouseRobbery.Client
                     // Stop any current movement
                     SetPedMoveRateOverride(crewMember.PedId, 1.0f);
 
-                    await BaseScript.Delay(200); // Longer delay for task clear
+                    //await BaseScript.Delay(200);
 
-                    TaskEnterVehicle(crewMember.PedId, playerVehicle, 20000, emptySeat, 1.5f, 1, 0);
+                    TaskEnterVehicle(crewMember.PedId, playerVehicle, 10000, emptySeat, 1.0f, 1, 0);
                     crewMember.LastVehicle = playerVehicle;
 
                     Debug.WriteLine($"[CREW] {crewMember.Name} ordered to enter vehicle seat {emptySeat} (distance: {distance:F1}m)");

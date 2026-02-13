@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HouseRobbery.Client")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+decd8896aa598fe48a6696065c7276fecfbb0025")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2f13c22f1d5bf40ce2cebf3c5e36cf8d997e1d3f")]
 [assembly: System.Reflection.AssemblyProductAttribute("HouseRobbery.Client")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HouseRobbery.Client")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

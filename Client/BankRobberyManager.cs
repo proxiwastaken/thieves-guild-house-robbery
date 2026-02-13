@@ -311,7 +311,7 @@ namespace HouseRobbery.Client
             }
         }
 
-        private void OnPlayerDeath()
+        private async void OnPlayerDeath()
         {
             if (CurrentState == RobberyState.Failed || CurrentState == RobberyState.Completed)
             {
@@ -319,14 +319,20 @@ namespace HouseRobbery.Client
             }
 
             CurrentState = RobberyState.Failed;
+
+            // Notify the player of the failure
             Screen.ShowNotification("~r~HEIST FAILED: You were eliminated!");
             Screen.ShowNotification("~r~The crew scattered when you went down!");
 
             Debug.WriteLine("[BANK] Mission failed due to player death");
 
-            // Cleanup the robbery
+            // Wait for a short delay to allow the death animation to complete
+            await BaseScript.Delay(5000); // 5-second delay
+
+            // Cleanup the robbery after the delay
             FailRobbery();
         }
+
 
         private async void CheckPlayerProximityToBank()
         {
